@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import math
 
 import ppb
@@ -12,11 +13,18 @@ def dist(v1, v2):
     return math.sqrt(a + b)
 
 
+@dataclass
+class EmitCloud:
+    pass
+
+
 class Mushroom(ppb.sprites.Sprite):
     image = ppb.Image("resources/smooshroom.png")
 
     smooshed: bool = False
     smoosh_time: float = 0.0
+
+    emit_t: float = 0.0
     
     def on_button_pressed(self, ev: ButtonPressed, signal):
         d = dist(self.position, ev.position)
@@ -26,10 +34,16 @@ class Mushroom(ppb.sprites.Sprite):
     
     def on_button_released(self, ev: ButtonReleased, signal):
         self.smooshed = False
-    
+
     def on_update(self, ev: Update, signal):
         if self.smooshed:
             self.smoosh_time = min(1.0, self.smoosh_time + ev.time_delta)
+            if self.smoosh_time < 0.5:
+                if self.emit_t <= 0.0:
+                    self.emit_t = 0.1
+                    signal(EmitCloud())
+                else:
+                    self.emit_t -= ev.time_delta
             t = out_quad(self.smoosh_time) * 0.2
             self.size = 1.0 - t
         else:

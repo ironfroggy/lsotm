@@ -286,7 +286,9 @@ class Bar:
                 segment.size = 1/4
 
 
+from cloud import CloudSystem
 from mushroom import Mushroom
+from viking import Viking
 
 
 def setup(scene):
@@ -300,6 +302,23 @@ def setup(scene):
         layer=10,
     ))
 
+    scene.add(Viking(
+        layer=10,
+        position=ppb.Vector(4, 4),
+    ), tags=['viking'])
+    scene.add(Viking(
+        layer=10,
+        position=ppb.Vector(-4, 4),
+    ), tags=['viking'])
+    scene.add(Viking(
+        layer=10,
+        position=ppb.Vector(4, -4),
+    ), tags=['viking'])
+    scene.add(Viking(
+        layer=10,
+        position=ppb.Vector(-4, -4),
+    ), tags=['viking'])
+
 
 ppb.run(
     setup=setup,
@@ -311,6 +330,7 @@ ppb.run(
         Timers,
         ParticleSystem,
         ScoreBoard,
+        CloudSystem,
     ],
     resolution=(1280, 720),
     window_title='🍄Last Stand of the Mushrooms🍄',
