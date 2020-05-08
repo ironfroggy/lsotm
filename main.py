@@ -300,7 +300,7 @@ def setup(scene):
 
     scene.add(Mushroom(
         layer=10,
-    ))
+    ), tags=['mushroom'])
 
     scene.add(Viking(
         layer=10,

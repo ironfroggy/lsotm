@@ -19,7 +19,10 @@ class EmitCloud:
 
 
 class Mushroom(ppb.sprites.Sprite):
-    image = ppb.Image("resources/smooshroom.png")
+    image: ppb.Image = ppb.Image("resources/mushroom/mushroom_0.png")
+    size: float = 1.0
+
+    health: int = 10
 
     smooshed: bool = False
     smoosh_time: float = 0.0
@@ -45,6 +48,13 @@ class Mushroom(ppb.sprites.Sprite):
                 else:
                     self.emit_t -= ev.time_delta
             t = out_quad(self.smoosh_time) * 0.2
-            self.size = 1.0 - t
+            self.size = 2.0 * (1.0 - t)
         else:
-            self.size = 1.0
+            self.size = 2.0
+    
+    def on_viking_attack(self, ev, signal):
+        self.health -= ev.dmg
+        print('mushroom is', self.health)
+        if self.health <= 0:
+            print('mushroom is dead')
+            ev.scene.remove(self)

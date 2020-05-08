@@ -16,16 +16,12 @@ def dist(v1, v2):
     return math.sqrt(a + b)
 
 
-@dataclass
-class CloudPoison:
-    position: ppb.Vector
-
-
 class Cloud(ppb.sprites.Sprite):
     heading: ppb.Vector
     image = ppb.Image("resources/cloud.png")
-    speed: float = 3.0
+    speed: float = 5.0
     lifetime: float = 1.0
+    size: float = 2.0
     
     def on_update(self, ev: Update, signal):
         self.lifetime -= ev.time_delta * 0.5
@@ -42,7 +38,7 @@ class Cloud(ppb.sprites.Sprite):
             # Collision check this cloud with all the vikings
             for viking in ev.scene.get(tag='viking'):
                 d = dist(viking.position, self.position)
-                if d < 0.5:
+                if d < 1.5:
                     viking.hit(ev.scene)
 
 
@@ -55,4 +51,5 @@ class CloudSystem(System):
             w = random.randrange(-r/2, r/2)
             heading = ppb.Vector(1, 0).rotate(w + r * i)
             cloud = Cloud(heading=heading)
+            cloud.size = 0
             ev.scene.add(cloud)
