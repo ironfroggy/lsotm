@@ -7,6 +7,7 @@ import ppb
 from ppb.events import ButtonPressed, ButtonReleased, Update
 
 from easing import out_quad
+from events import ScorePoints
 from statemachine import StateMachine
 import tweening
 
@@ -49,8 +50,8 @@ class ApproachState(State):
     @staticmethod
     def on_update(self, ev, signal):
         t = time.monotonic()
-        if not self.target:
-            self.target = next(ev.scene.get(tag='mushroom'))
+        if not self.target or not self.target.health:
+            self.target = choice(list(ev.scene.get(tag='mushroom')))
         d = dist(self.position, self.target.position)
         if d > 1.0:
             h = (self.target.position - self.position).normalize()
@@ -61,12 +62,16 @@ class ApproachState(State):
 class AttackState(State):
     @staticmethod
     def on_update(self, ev, signal):
-        d = dist(self.position, self.target.position)
-        if d <= 1.0:
-            signal(VikingAttack(self.target, 1))
-            self.set_state("cooldown")
+        if self.target.health == 0:
+            self.target = None
+            self.set_state('cooldown')
         else:
-            self.set_state("approach")
+            d = dist(self.position, self.target.position)
+            if d <= 1.0:
+                signal(VikingAttack(self.target, 1))
+                self.set_state("cooldown")
+            else:
+                self.set_state("approach")
 
 class DieingState(State):
     @staticmethod
@@ -79,10 +84,13 @@ class DieingState(State):
         ev.scene.remove(self.sprite_base)
         ev.scene.remove(self.sprite_clothes)
         ev.scene.remove(self.sprite_hat)
+        signal(ScorePoints(1))
 
 class CooldownState(State):
     def on_update(self, ev, signal):
         if self.state_time() > 0.5:
+            if not self.target or not self.target.health:
+                self.target = choice(list(ev.scene.get(tag='mushroom')))
             d = dist(self.position, self.target.position)
             if d <= 1.0:
                 self.set_state("attack")

@@ -5,6 +5,7 @@ import ppb
 from ppb.events import ButtonPressed, ButtonReleased, Update
 
 from easing import out_quad
+from events import ScorePoints
 
 
 def dist(v1, v2):
@@ -15,7 +16,7 @@ def dist(v1, v2):
 
 @dataclass
 class EmitCloud:
-    pass
+    position: ppb.Vector
 
 
 class Mushroom(ppb.sprites.Sprite):
@@ -44,7 +45,7 @@ class Mushroom(ppb.sprites.Sprite):
             if self.smoosh_time < 0.5:
                 if self.emit_t <= 0.0:
                     self.emit_t = 0.1
-                    signal(EmitCloud())
+                    signal(EmitCloud(self.position))
                 else:
                     self.emit_t -= ev.time_delta
             t = out_quad(self.smoosh_time) * 0.2
@@ -53,8 +54,9 @@ class Mushroom(ppb.sprites.Sprite):
             self.size = 2.0
     
     def on_viking_attack(self, ev, signal):
-        self.health -= ev.dmg
-        print('mushroom is', self.health)
-        if self.health <= 0:
-            print('mushroom is dead')
-            ev.scene.remove(self)
+        if ev.target is self:
+            self.health = max(0, self.health - ev.dmg)
+            print('mushroom is', self.health)
+            if self.health <= 0:
+                print('mushroom is dead')
+                ev.scene.remove(self)

@@ -50,6 +50,6 @@ class CloudSystem(System):
         for i in range(self.STEPS):
             w = random.randrange(-r/2, r/2)
             heading = ppb.Vector(1, 0).rotate(w + r * i)
-            cloud = Cloud(heading=heading)
+            cloud = Cloud(heading=heading, position=ev.position)
             cloud.size = 0
             ev.scene.add(cloud)

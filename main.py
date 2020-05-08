@@ -290,6 +290,43 @@ from cloud import CloudSystem
 from mushroom import Mushroom
 from viking import Viking
 
+import ui
+
+
+class VikingSpawn(System):
+
+    def on_update(self, ev, signal):
+        vikings = list(ev.scene.get(tag='viking'))
+        if not vikings:
+            for i in range(randint(1, 1)):
+                ev.scene.add(Viking(
+                    layer=10,
+                    position=ppb.Vector(5, 0).rotate(randint(0, 360)),
+                ), tags=['viking'])
+
+
+@dataclass
+class PlaceNewMushroom:
+    pass
+
+class MushroomPlacement(System):
+
+    def on_scene_started(self, ev, signal):
+        self.mode = "waiting"
+        signal(ui.CreateButton("+Mushroom", PlaceNewMushroom()))
+    
+    def on_place_new_mushroom(self, ev, signal):
+        self.mode = "placing"
+    
+    def on_button_released(self, ev, signal):
+        if self.mode == "placing":
+            ev.scene.add(Mushroom(
+                position=ev.position,
+                layer=10,
+            ), tags=['mushroom'])
+            self.mode = "waiting"
+            signal(ScorePoints(-3))
+
 
 def setup(scene):
     scene.add(ppb.Sprite(
@@ -301,23 +338,6 @@ def setup(scene):
     scene.add(Mushroom(
         layer=10,
     ), tags=['mushroom'])
-
-    scene.add(Viking(
-        layer=10,
-        position=ppb.Vector(4, 4),
-    ), tags=['viking'])
-    scene.add(Viking(
-        layer=10,
-        position=ppb.Vector(-4, 4),
-    ), tags=['viking'])
-    scene.add(Viking(
-        layer=10,
-        position=ppb.Vector(4, -4),
-    ), tags=['viking'])
-    scene.add(Viking(
-        layer=10,
-        position=ppb.Vector(-4, -4),
-    ), tags=['viking'])
 
 
 ppb.run(
@@ -331,6 +351,9 @@ ppb.run(
         ParticleSystem,
         ScoreBoard,
         CloudSystem,
+        VikingSpawn,
+        ui.UISystem,
+        MushroomPlacement,
     ],
     resolution=(1280, 720),
     window_title='🍄Last Stand of the Mushrooms🍄',
