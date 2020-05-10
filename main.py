@@ -41,11 +41,6 @@ COLOR = {
 }
 
 
-def dist(v1, v2):
-    a = abs(v1.x - v2.x) ** 2
-    b = abs(v1.y - v2.y) ** 2
-    return math.sqrt(a + b)
-
 def first(iterator):
     return next(iter(iterator))
 
@@ -220,11 +215,13 @@ class ScoreBoard(System):
     def on_score_points(cls, ev, signal):
         cls.score += ev.points
         cls.text.text = str(cls.score)
+        signal(ScoreUpdated(cls.score))
     
     @classmethod
     def on_score_set(cls, ev, signal):
         cls.score = ev.points
         cls.text.text = str(cls.score)
+        signal(ScoreUpdated(cls.score))
 
 
 @dataclass
@@ -313,10 +310,17 @@ class MushroomPlacement(System):
 
     def on_scene_started(self, ev, signal):
         self.mode = "waiting"
-        signal(ui.CreateButton("+Mushroom", PlaceNewMushroom()))
+        signal(ui.CreateButton("Mushroom", enabled=False))
     
-    def on_place_new_mushroom(self, ev, signal):
-        self.mode = "placing"
+    def on_score_updated(self, ev, signal):
+        if ev.points >= 3:
+            signal(ui.EnableButton("Mushroom"))
+        else:
+            signal(ui.DisableButton("Mushroom"))
+
+    def on_ui_button_pressed(self, ev, signal):
+        if ev.label == "Mushroom":
+            self.mode = "placing"
     
     def on_button_released(self, ev, signal):
         if self.mode == "placing":

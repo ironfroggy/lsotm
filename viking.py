@@ -5,6 +5,7 @@ import time
 
 import ppb
 from ppb.events import ButtonPressed, ButtonReleased, Update
+from ppb.features.animation import Animation
 
 from easing import out_quad
 from events import ScorePoints
@@ -19,7 +20,7 @@ def dist(v1, v2):
 
 
 VIKING_BASE = [
-    ppb.Image(f"resources/viking/l0_sprite_1.png")
+    ppb.Image("resources/viking/l0_sprite_1.png")
     # for i in range(1, 8)
 ]
 
@@ -41,6 +42,8 @@ class VikingAttack:
 
 
 class State:
+    
+    @staticmethod
     def enter_state(self):
         pass
 
@@ -60,6 +63,7 @@ class ApproachState(State):
             self.set_state("cooldown")
     
 class AttackState(State):
+
     @staticmethod
     def on_update(self, ev, signal):
         if self.target.health == 0:
@@ -73,34 +77,52 @@ class AttackState(State):
             else:
                 self.set_state("approach")
 
+
 class DieingState(State):
+
     @staticmethod
     def enter_state(self):
-        self.sprite_base.opacity = 128
+        self.sprite_base.image = VIKING_BASE[0]
 
     @staticmethod
     def on_update(self, ev, signal):
-        ev.scene.remove(self)
-        ev.scene.remove(self.sprite_base)
-        ev.scene.remove(self.sprite_clothes)
-        ev.scene.remove(self.sprite_hat)
-        signal(ScorePoints(1))
+        o = tweening.lerp(255, 0, self.state_time())
+
+        self.sprite_base.opacity = o
+        self.sprite_clothes.opacity = o
+        self.sprite_hat.opacity = o
+
+        if self.state_time() >= 1.0:
+            ev.scene.remove(self)
+            ev.scene.remove(self.sprite_base)
+            ev.scene.remove(self.sprite_clothes)
+            ev.scene.remove(self.sprite_hat)
+            signal(ScorePoints(1))
+
 
 class CooldownState(State):
+
+    @staticmethod
     def on_update(self, ev, signal):
-        if self.state_time() > 0.5:
+        if self.state_time() >= 0.5:
             if not self.target or not self.target.health:
-                self.target = choice(list(ev.scene.get(tag='mushroom')))
-            d = dist(self.position, self.target.position)
-            if d <= 1.0:
-                self.set_state("attack")
-            else:
-                self.set_state("approach")
+                try:
+                    self.target = choice(list(ev.scene.get(tag='mushroom')))
+                except IndexError:
+                    self.target = None
+                    self.set_state("cooldown")
+            
+            if self.target:
+                d = dist(self.position, self.target.position)
+                if d <= 1.0:
+                    self.set_state("attack")
+                else:
+                    self.set_state("approach")
 
 STATES = {
     'attack': AttackState,
     'approach': ApproachState,
-    'dead': DieingState,
+    'dieing': DieingState,
     'cooldown': CooldownState,
 }
 
@@ -116,20 +138,25 @@ class Viking(ppb.Sprite):
     sprite_hat: ppb.Sprite = None
     sprite_clothes: ppb.Sprite = None
 
-    state = ApproachState()
+    state = ApproachState
     last_state_change: float = 0.0
 
     def set_state(self, state):
-        self.state = STATES[state]
-        self.state.enter_state(self)
-        self.last_state_change = time.monotonic()
+        if self.state != state:
+            self.last_state_change = time.monotonic()
+            self.state = STATES[state]
+            self.state.enter_state(self)
 
     def state_time(self):
         return time.monotonic() - self.last_state_change
 
     def on_pre_render(self, ev, signal):
         if self.sprite_base is None:
-            self.sprite_base = ppb.Sprite(image=choice(VIKING_BASE), layer=self.layer, size=2)
+            self.sprite_base = ppb.Sprite(
+                image=Animation("resources/viking/l0_sprite_{1..7}.png", 10),
+                layer=self.layer,
+                size=2,
+            )
             self.sprite_clothes = ppb.Sprite(image=choice(VIKING_CLOTHES), layer=self.layer + 1, size=2)
             self.sprite_hat = ppb.Sprite(image=choice(VIKING_HAT), layer=self.layer + 1, size=2)
 
@@ -155,4 +182,4 @@ class Viking(ppb.Sprite):
             self.last_hit = t
             self.hp -= 1
             if self.hp <= 0:
-                self.set_state('dead')
+                self.set_state('dieing')

@@ -80,3 +80,7 @@ class ScorePoints:
 @dataclass
 class ScoreSet:
     points: int
+
+@dataclass
+class ScoreUpdated:
+    points: int
