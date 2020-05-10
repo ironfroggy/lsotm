@@ -1,20 +1,31 @@
 import ppb
 
 
-FONTSHEET = ppb.Image("resources/sonic_asalga.png")
-LEGEND = """ !"#$%&'
-<>*+,-./
-01234567
-89:;<=>?
-@ABCDEFG
-HIJKLMNO
-PQRSTUVW
-XYZ[\]^_
-`abcdefg
-hijklmno
-pqrstuvw
-xyz{|}~
-"""
+FONTSHEET = ppb.Image("resources/font2.gif")
+# LEGEND = """ !"#$%&'
+# <>*+,-./
+# 01234567
+# 89:;<=>?
+# @ABCDEFG
+# HIJKLMNO
+# PQRSTUVW
+# XYZ[\]^_
+# `abcdefg
+# hijklmno
+# pqrstuvw
+# xyz{|}~
+# """
+
+LEGEND = """
+                
+
+ !"#$%&'()*+,-./
+0123456789:;<=>?
+@ABCDEFGHIJKLMNO
+PQRSTUVWXYZ[\]^_
+`abcdefghijklmno
+pqrstuvwxyz{|}~ 
+"""[1:]
 
 class Letter(ppb.Sprite):
     image = FONTSHEET
@@ -28,6 +39,7 @@ class Letter(ppb.Sprite):
             for x, col in enumerate(row):
                 if char in col:
                     self.rect = (x*16, y*16, 16, 16)
+                    return
 
 class Text:
     def __init__(self, text, position, layer=100, align='center'):

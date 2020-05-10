@@ -47,6 +47,16 @@ class State:
     def enter_state(self):
         pass
 
+    @staticmethod
+    def on_mushroom_attack(self, ev, signal):
+        t = time.monotonic()
+        if t - self.last_hit >= 1.0:
+            self.set_state('cooldown')
+            self.last_hit = t
+            self.hp -= 1
+            if self.hp <= 0:
+                self.set_state('dieing')
+
 
 class ApproachState(State):
 
@@ -98,6 +108,10 @@ class DieingState(State):
             ev.scene.remove(self.sprite_clothes)
             ev.scene.remove(self.sprite_hat)
             signal(ScorePoints(1))
+    
+    @staticmethod
+    def on_mushroom_attack(self, ev, signal):
+        pass
 
 
 class CooldownState(State):
@@ -127,6 +141,14 @@ STATES = {
 }
 
 
+def state_method(name):
+    def _(self, ev, signal):
+        handler = getattr(self.state, name, None)
+        if handler:
+            handler(self, ev, signal)
+    return _
+
+
 class Viking(ppb.Sprite):
     size: float = 0.0
     speed: float = 0.5
@@ -142,7 +164,7 @@ class Viking(ppb.Sprite):
     last_state_change: float = 0.0
 
     def set_state(self, state):
-        if self.state != state:
+        if self.state != STATES[state]:
             self.last_state_change = time.monotonic()
             self.state = STATES[state]
             self.state.enter_state(self)
@@ -175,11 +197,6 @@ class Viking(ppb.Sprite):
         if d < 0.5:
             self.size = max(0.0, self.size - 0.1)
     
-    def hit(self, scene):
-        t = time.monotonic()
-        if t - self.last_hit >= 1.0:
-            self.set_state('cooldown')
-            self.last_hit = t
-            self.hp -= 1
-            if self.hp <= 0:
-                self.set_state('dieing')
+    # def on_mushroom_attack(self, ev, signal):
+    #     self.state.on_mushroom_attack(self, ev, signal)
+    on_mushroom_attack = state_method('on_mushroom_attack')

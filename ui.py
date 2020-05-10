@@ -4,6 +4,7 @@ import math
 import ppb
 from ppb.systemslib import System
 
+import text
 
 
 LAYER = 500
@@ -81,6 +82,11 @@ class UISystem(System):
         element.position = ppb.Vector(-5 + len(self.ui_elements), 5)
         ev.scene.add(element)
         self.ui_elements[ev.label] = element
+
+        label = text.Text(ev.label, position=element.position)
+        label.scene = ev.scene
+        ev.scene.add(label)
+        label.setup()
     
     def on_button_released(self, ev, signal):
         for element in self.ui_elements.values():

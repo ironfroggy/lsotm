@@ -333,6 +333,9 @@ class MushroomPlacement(System):
 
 
 def setup(scene):
+    # text = Text("Hello, World", V(0, -4))
+    # scene.add(text)
+
     scene.add(ppb.Sprite(
         image=ppb.Image("resources/BACKGROUND.png"),
         size=12,

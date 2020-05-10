@@ -16,6 +16,12 @@ def dist(v1, v2):
     return math.sqrt(a + b)
 
 
+@dataclass
+class MushroomAttack:
+    mushroom: 'mushroom.Mushroom'
+    target: 'viking.Viking'
+
+
 class Cloud(ppb.sprites.Sprite):
     heading: ppb.Vector
     image = ppb.Image("resources/cloud.png")
@@ -39,7 +45,7 @@ class Cloud(ppb.sprites.Sprite):
             for viking in ev.scene.get(tag='viking'):
                 d = dist(viking.position, self.position)
                 if d < 1.5:
-                    viking.hit(ev.scene)
+                    signal(MushroomAttack(None, viking))
 
 
 class CloudSystem(System):
