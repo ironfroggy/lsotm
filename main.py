@@ -208,7 +208,7 @@ class ScoreBoard(System):
     @classmethod
     def on_scene_started(cls, ev, signal):
         cls.score = 0
-        cls.text = Text(str(cls.score), V(0, 4))
+        cls.text = Text(str(cls.score), V(0, 4), color=COLOR['YELLOW'])
         ev.scene.add(cls.text)
     
     @classmethod
@@ -347,11 +347,6 @@ def setup(scene):
     ), tags=['bg'])
 
     scene.add(Mushroom(
-        layer=10,
-    ), tags=['mushroom'])
-
-    scene.add(Mushroom(
-        position=ppb.Vector(2, 0),
         layer=10,
     ), tags=['mushroom'])
 

@@ -14,6 +14,8 @@ from statemachine import StateMachine
 import tweening
 import typing
 
+from constants import COLOR
+
 from spritedepth import pos_to_layer
 
 
@@ -113,6 +115,7 @@ class DieingState(State):
             ev.scene.remove(self.sprite_clothes)
             ev.scene.remove(self.sprite_hat)
             signal(ScorePoints(1))
+            signal(CreateFloatingNumber(1, self.position, COLOR['YELLOW']))
     
     @staticmethod
     def on_mushroom_attack(self, ev, signal):
