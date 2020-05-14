@@ -9,6 +9,7 @@ from ppb.features.animation import Animation
 
 from easing import out_quad
 from events import ScorePoints
+from floatingnumbers import CreateFloatingNumber
 from statemachine import StateMachine
 import tweening
 
@@ -56,6 +57,7 @@ class State:
             self.hp -= 1
             if self.hp <= 0:
                 self.set_state('dieing')
+            signal(CreateFloatingNumber(-1, self.position, (255, 0, 0)))
 
 
 class ApproachState(State):

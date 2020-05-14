@@ -286,6 +286,7 @@ class Bar:
 from cloud import CloudSystem
 from mushroom import Mushroom
 from viking import Viking
+from floatingnumbers import FloatingNumberSystem
 
 import ui
 
@@ -332,6 +333,9 @@ class MushroomPlacement(System):
             signal(ScorePoints(-3))
 
 
+
+
+
 def setup(scene):
     # text = Text("Hello, World", V(0, -4))
     # scene.add(text)
@@ -361,6 +365,7 @@ ppb.run(
         VikingSpawn,
         ui.UISystem,
         MushroomPlacement,
+        FloatingNumberSystem,
     ],
     resolution=(1280, 720),
     window_title='🍄Last Stand of the Mushrooms🍄',

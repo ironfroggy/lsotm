@@ -6,6 +6,7 @@ from ppb.events import ButtonPressed, ButtonReleased, Update
 
 from easing import out_quad
 from events import ScorePoints
+from floatingnumbers import CreateFloatingNumber
 
 
 def dist(v1, v2):
@@ -56,7 +57,6 @@ class Mushroom(ppb.sprites.Sprite):
     def on_viking_attack(self, ev, signal):
         if ev.target is self:
             self.health = max(0, self.health - ev.dmg)
-            print('mushroom is', self.health)
+            signal(CreateFloatingNumber(-1, self.position, (255, 0, 0)))
             if self.health <= 0:
-                print('mushroom is dead')
                 ev.scene.remove(self)
