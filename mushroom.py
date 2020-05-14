@@ -8,6 +8,8 @@ from easing import out_quad
 from events import ScorePoints
 from floatingnumbers import CreateFloatingNumber
 
+from spritedepth import pos_to_layer
+
 
 def dist(v1, v2):
     a = abs(v1.x - v2.x) ** 2
@@ -53,6 +55,9 @@ class Mushroom(ppb.sprites.Sprite):
             self.size = 2.0 * (1.0 - t)
         else:
             self.size = 2.0
+
+    def on_pre_render(self, ev, signal):
+        self.layer = pos_to_layer(self.position)
     
     def on_viking_attack(self, ev, signal):
         if ev.target is self:

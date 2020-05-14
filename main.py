@@ -296,7 +296,7 @@ class VikingSpawn(System):
     def on_update(self, ev, signal):
         vikings = list(ev.scene.get(tag='viking'))
         if not vikings:
-            for i in range(randint(1, 1)):
+            for i in range(randint(3, 5)):
                 ev.scene.add(Viking(
                     layer=10,
                     position=ppb.Vector(5, 0).rotate(randint(0, 360)),
@@ -347,6 +347,11 @@ def setup(scene):
     ), tags=['bg'])
 
     scene.add(Mushroom(
+        layer=10,
+    ), tags=['mushroom'])
+
+    scene.add(Mushroom(
+        position=ppb.Vector(2, 0),
         layer=10,
     ), tags=['mushroom'])
 

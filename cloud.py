@@ -9,6 +9,8 @@ from ppb.events import ButtonPressed, ButtonReleased, Update
 from easing import out_quad
 import tweening
 
+from spritedepth import pos_to_layer
+
 
 def dist(v1, v2):
     a = abs(v1.x - v2.x) ** 2
@@ -44,8 +46,13 @@ class Cloud(ppb.sprites.Sprite):
             # Collision check this cloud with all the vikings
             for viking in ev.scene.get(tag='viking'):
                 d = dist(viking.position, self.position)
-                if d < 1.5:
+                if d < 1.0:
                     signal(MushroomAttack(None, viking))
+                    break
+
+    def on_pre_render(self, ev, signal):
+        self.layer = pos_to_layer(self.position)
+        assert self.layer > 0, self.layer
 
 
 class CloudSystem(System):

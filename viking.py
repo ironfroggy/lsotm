@@ -12,6 +12,9 @@ from events import ScorePoints
 from floatingnumbers import CreateFloatingNumber
 from statemachine import StateMachine
 import tweening
+import typing
+
+from spritedepth import pos_to_layer
 
 
 def dist(v1, v2):
@@ -51,7 +54,7 @@ class State:
     @staticmethod
     def on_mushroom_attack(self, ev, signal):
         t = time.monotonic()
-        if t - self.last_hit >= 1.0:
+        if t - self.last_hit >= 1.0 and self is ev.target:
             self.set_state('cooldown')
             self.last_hit = t
             self.hp -= 1
@@ -162,8 +165,12 @@ class Viking(ppb.Sprite):
     sprite_hat: ppb.Sprite = None
     sprite_clothes: ppb.Sprite = None
 
-    state = ApproachState
+    state: typing.Type[State] = None
     last_state_change: float = 0.0
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.state = ApproachState
 
     def set_state(self, state):
         if self.state != STATES[state]:
@@ -175,21 +182,25 @@ class Viking(ppb.Sprite):
         return time.monotonic() - self.last_state_change
 
     def on_pre_render(self, ev, signal):
+        layer = pos_to_layer(self.position)
         if self.sprite_base is None:
             self.sprite_base = ppb.Sprite(
                 image=Animation("resources/viking/l0_sprite_{1..7}.png", 10),
-                layer=self.layer,
+                layer=layer,
                 size=2,
             )
-            self.sprite_clothes = ppb.Sprite(image=choice(VIKING_CLOTHES), layer=self.layer + 1, size=2)
-            self.sprite_hat = ppb.Sprite(image=choice(VIKING_HAT), layer=self.layer + 1, size=2)
+            self.sprite_clothes = ppb.Sprite(image=choice(VIKING_CLOTHES), layer=layer + 0.1, size=2)
+            self.sprite_hat = ppb.Sprite(image=choice(VIKING_HAT), layer=layer + 0.1, size=2)
 
             ev.scene.add(self.sprite_base)
             ev.scene.add(self.sprite_clothes)
             ev.scene.add(self.sprite_hat)
         self.sprite_base.position = self.position
+        self.sprite_base.layer = layer
         self.sprite_hat.position = self.position
+        self.sprite_hat.layer = layer + 0.1
         self.sprite_clothes.position = self.position
+        self.sprite_clothes.layer = layer + 0.1
     
     def on_update(self, ev: Update, signal):
         self.state.on_update(self, ev, signal)
@@ -199,6 +210,6 @@ class Viking(ppb.Sprite):
         if d < 0.5:
             self.size = max(0.0, self.size - 0.1)
     
-    # def on_mushroom_attack(self, ev, signal):
-    #     self.state.on_mushroom_attack(self, ev, signal)
-    on_mushroom_attack = state_method('on_mushroom_attack')
+    def on_mushroom_attack(self, ev, signal):
+        self.state.on_mushroom_attack(self, ev, signal)
+    # on_mushroom_attack = state_method('on_mushroom_attack')
