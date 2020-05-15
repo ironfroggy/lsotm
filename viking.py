@@ -25,6 +25,8 @@ def dist(v1, v2):
     return math.sqrt(a + b)
 
 
+VIKING_ATK = Animation("resources/viking/l0_sprite_{1..7}.png", 10)
+
 VIKING_BASE = [
     ppb.Image("resources/viking/l0_sprite_1.png")
     # for i in range(1, 8)
@@ -56,9 +58,10 @@ class State:
     @staticmethod
     def on_mushroom_attack(self, ev, signal):
         t = time.monotonic()
-        if t - self.last_hit >= 1.0 and self is ev.target:
+        if t - self.last_hit >= 1.0 and self.last_hit_by < ev.cloud_id and self is ev.target:
             self.set_state('cooldown')
             self.last_hit = t
+            self.last_hit_by = ev.cloud_id
             self.hp -= 1
             if self.hp <= 0:
                 self.set_state('dieing')
@@ -73,7 +76,7 @@ class ApproachState(State):
         if not self.target or not self.target.health:
             self.target = choice(list(ev.scene.get(tag='mushroom')))
         d = dist(self.position, self.target.position)
-        if d > 1.0:
+        if d >= 1.5:
             h = (self.target.position - self.position).normalize()
             self.position += h * self.speed * ev.time_delta
         else:
@@ -82,14 +85,19 @@ class ApproachState(State):
 class AttackState(State):
 
     @staticmethod
+    def enter_state(self):
+        self.sprite_base.image = VIKING_BASE[0]
+
+    @staticmethod
     def on_update(self, ev, signal):
         if self.target.health == 0:
             self.target = None
             self.set_state('cooldown')
         else:
             d = dist(self.position, self.target.position)
-            if d <= 1.0:
+            if d <= 1.5:
                 signal(VikingAttack(self.target, 1))
+                self.sprite_base.image = Animation("resources/viking/attack_{0..4}.png", 10)
                 self.set_state("cooldown")
             else:
                 self.set_state("approach")
@@ -127,6 +135,8 @@ class CooldownState(State):
     @staticmethod
     def on_update(self, ev, signal):
         if self.state_time() >= 0.5:
+            self.sprite_base.image = VIKING_BASE[0]
+        if self.state_time() >= 1.0:
             if not self.target or not self.target.health:
                 try:
                     self.target = choice(list(ev.scene.get(tag='mushroom')))
@@ -136,7 +146,7 @@ class CooldownState(State):
             
             if self.target:
                 d = dist(self.position, self.target.position)
-                if d <= 1.0:
+                if d <= 1.5:
                     self.set_state("attack")
                 else:
                     self.set_state("approach")
@@ -159,9 +169,10 @@ def state_method(name):
 
 class Viking(ppb.Sprite):
     size: float = 0.0
-    speed: float = 0.5
+    speed: float = 0.25
     hp: int = 3
     last_hit: float = 0.0
+    last_hit_by: int = 0
     target: ppb.Sprite = None
 
     sprite_base: ppb.Sprite = None

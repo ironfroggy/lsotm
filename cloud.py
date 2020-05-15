@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import math
 import random
+from time import perf_counter
 
 import ppb
 from ppb.systemslib import System
@@ -12,15 +13,9 @@ import tweening
 from spritedepth import pos_to_layer
 
 
-def dist(v1, v2):
-    a = abs(v1.x - v2.x) ** 2
-    b = abs(v1.y - v2.y) ** 2
-    return math.sqrt(a + b)
-
-
 @dataclass
 class MushroomAttack:
-    mushroom: 'mushroom.Mushroom'
+    cloud_id: int
     target: 'viking.Viking'
 
 
@@ -30,25 +25,19 @@ class Cloud(ppb.sprites.Sprite):
     speed: float = 5.0
     lifetime: float = 1.0
     size: float = 2.0
-    
+    last_hit_time: float = 0.0
+    opacity: int = 255
+
+    def __init__(self, *args, **kwargs):
+        self.cloud_id = kwargs.get('cloud_id')
+        super().__init__(*args, **kwargs)
+
     def on_update(self, ev: Update, signal):
         self.lifetime -= ev.time_delta * 0.5
 
         t = 1.0 - self.lifetime
-        self.opacity = tweening.lerp(255, 0, t)
-        self.size = tweening.lerp(0.0, 1.0, t)
-        self.speed = tweening.lerp(2.0, 0.0, out_quad(t))
         if self.lifetime <= 0.0:
             ev.scene.remove(self)
-        else:
-            self.position += self.heading * self.speed * ev.time_delta
-
-            # Collision check this cloud with all the vikings
-            for viking in ev.scene.get(tag='viking'):
-                d = dist(viking.position, self.position)
-                if d < 1.0:
-                    signal(MushroomAttack(None, viking))
-                    break
 
     def on_pre_render(self, ev, signal):
         self.layer = pos_to_layer(self.position)
@@ -61,8 +50,12 @@ class CloudSystem(System):
     def on_emit_cloud(self, ev, signal):
         r = 360 / self.STEPS
         for i in range(self.STEPS):
-            w = random.randrange(-r/2, r/2)
-            heading = ppb.Vector(1, 0).rotate(w + r * i)
-            cloud = Cloud(heading=heading, position=ev.position)
-            cloud.size = 0
+            w = random.randrange(-r//2, r//2)
+            heading = ppb.Vector(1.5, 0).rotate(w + r * i)
+            cloud = Cloud(heading=heading, position=ev.position, cloud_id=ev.cloud_id)
+            cloud.size = 0.0
             ev.scene.add(cloud)
+
+            tweening.tween(cloud, "position", heading, 1.0, easing='out_quad')
+            tweening.tween(cloud, "size", 1.0, 1.0, easing='linear')
+            tweening.tween(cloud, "opacity", 0, 1.0, easing='in_quint')

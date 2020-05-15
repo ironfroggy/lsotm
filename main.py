@@ -296,10 +296,10 @@ class VikingSpawn(System):
     def on_update(self, ev, signal):
         vikings = list(ev.scene.get(tag='viking'))
         if not vikings:
-            for i in range(randint(3, 5)):
+            for i in range(randint(1, 5)):
                 ev.scene.add(Viking(
                     layer=10,
-                    position=ppb.Vector(5, 0).rotate(randint(0, 360)),
+                    position=ppb.Vector(5, i).rotate(randint(0, 360)),
                 ), tags=['viking'])
 
 

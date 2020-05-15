@@ -6,6 +6,9 @@ def linear(t):
 def in_quad(t):
     return t*t
 
+def in_quint(t):
+    return t*t*t
+
 def out_quad(t):
     return t * (2 - t)
 
