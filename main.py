@@ -284,7 +284,7 @@ class Bar:
 
 
 from cloud import CloudSystem
-from mushroom import Mushroom
+from mushroom import Mushroom, MushroomPlacement
 from viking import Viking
 from floatingnumbers import FloatingNumberSystem
 
@@ -301,39 +301,6 @@ class VikingSpawn(System):
                     layer=10,
                     position=ppb.Vector(5, i).rotate(randint(0, 360)),
                 ), tags=['viking'])
-
-
-@dataclass
-class PlaceNewMushroom:
-    pass
-
-class MushroomPlacement(System):
-
-    def on_scene_started(self, ev, signal):
-        self.mode = "waiting"
-        signal(ui.CreateButton("Mushroom", enabled=False))
-    
-    def on_score_updated(self, ev, signal):
-        if ev.points >= 3:
-            signal(ui.EnableButton("Mushroom"))
-        else:
-            signal(ui.DisableButton("Mushroom"))
-
-    def on_ui_button_pressed(self, ev, signal):
-        if ev.label == "Mushroom":
-            self.mode = "placing"
-    
-    def on_button_released(self, ev, signal):
-        if self.mode == "placing":
-            ev.scene.add(Mushroom(
-                position=ev.position,
-                layer=10,
-            ), tags=['mushroom'])
-            self.mode = "waiting"
-            signal(ScorePoints(-3))
-
-
-
 
 
 def setup(scene):

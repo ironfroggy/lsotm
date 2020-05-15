@@ -56,6 +56,6 @@ class CloudSystem(System):
             cloud.size = 0.0
             ev.scene.add(cloud)
 
-            tweening.tween(cloud, "position", heading, 1.0, easing='out_quad')
+            tweening.tween(cloud, "position", ev.position + heading, 1.0, easing='out_quad')
             tweening.tween(cloud, "size", 1.0, 1.0, easing='linear')
             tweening.tween(cloud, "opacity", 0, 1.0, easing='in_quint')

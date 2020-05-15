@@ -4,11 +4,14 @@ from time import perf_counter
 
 import ppb
 from ppb.events import ButtonPressed, ButtonReleased, Update
+from ppb.systemslib import System
 
+from constants import COLOR
 from easing import out_quad
 from events import ScorePoints
 from floatingnumbers import CreateFloatingNumber
 import tweening
+import ui
 
 from cloud import MushroomAttack
 
@@ -19,6 +22,10 @@ from spritedepth import pos_to_layer
 class EmitCloud:
     position: ppb.Vector
     cloud_id: int
+
+@dataclass
+class PlaceNewMushroom:
+    pass
 
 
 def debounce(obj, marker, delay):
@@ -89,3 +96,55 @@ class Mushroom(ppb.sprites.Sprite):
             signal(CreateFloatingNumber(-1, self.position, (255, 0, 0)))
             if self.health <= 0:
                 ev.scene.remove(self)
+
+
+class MushroomPlacementMarker(ppb.Sprite):
+    image: ppb.Image = ppb.Image("resources/mushroom/mushroom_0.png")
+    size: float = 2.0
+    layer: float = 200
+    color = COLOR['WHITE']
+
+
+class MushroomPlacement(System):
+
+    def on_scene_started(self, ev, signal):
+        self.mode = "waiting"
+        self.marker = MushroomPlacementMarker()
+        ev.scene.add(self.marker)
+        signal(ui.CreateButton("Mushroom", enabled=False))
+        signal(ui.DisableButton("Mushroom"))
+    
+    def on_score_updated(self, ev, signal):
+        if ev.points >= 3:
+            signal(ui.EnableButton("Mushroom"))
+        else:
+            signal(ui.DisableButton("Mushroom"))
+
+    def on_ui_button_pressed(self, ev, signal):
+        if ev.label == "Mushroom":
+            self.mode = "placing"
+            self.marker.size = 2.0
+    
+    def on_button_released(self, ev, signal):
+        if self.mode == "placing" and self.can_place:
+            ev.scene.add(Mushroom(
+                position=ev.position,
+                layer=10,
+            ), tags=['mushroom'])
+            self.mode = "waiting"
+            signal(ScorePoints(-3))
+            self.marker.size = 0.0
+    
+    def on_mouse_motion(self, ev, signal):
+        if self.mode == "placing":
+            self.marker.position = ev.position
+            closest = 100.0
+            for mushroom in ev.scene.get(tag='mushroom'):
+                d = (mushroom.position - ev.position).length
+                closest = min(closest, d)
+            if closest >= 1.5:
+                self.can_place = True
+                self.marker.color = COLOR['GREEN']
+            else:
+                self.can_place = False
+                self.marker.color = COLOR['RED']
