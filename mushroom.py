@@ -18,6 +18,14 @@ from cloud import MushroomAttack
 from spritedepth import pos_to_layer
 
 
+MUSHROOM_SPRITES = [
+    ppb.Image("resources/mushroom/mushroom_0.png"),
+    ppb.Image("resources/mushroom/mushroom_1.png"),
+    ppb.Image("resources/mushroom/mushroom_2.png"),
+    ppb.Image("resources/mushroom/mushroom_3.png"),
+]
+
+
 @dataclass
 class EmitCloud:
     position: ppb.Vector
@@ -39,8 +47,8 @@ def debounce(obj, marker, delay):
 
 
 class Mushroom(ppb.sprites.Sprite):
-    image: ppb.Image = ppb.Image("resources/mushroom/mushroom_0.png")
-    size: float = 1.0
+    image: ppb.Image = MUSHROOM_SPRITES[0]
+    size: float = 2.0
 
     health: int = 10
 
@@ -64,10 +72,14 @@ class Mushroom(ppb.sprites.Sprite):
     
     def on_button_released(self, ev: ButtonReleased, signal):
         self.smooshed = False
+        self.image = MUSHROOM_SPRITES[0]
 
     def on_update(self, ev: Update, signal):
         if self.smooshed:
             self.smoosh_time = min(1.0, self.smoosh_time + ev.time_delta)
+            i = tweening.lerp(0, 3, out_quad(self.smoosh_time * 2.0))
+            self.image = MUSHROOM_SPRITES[i]
+
             if self.smoosh_time < 0.5:
                 if self.emit_t <= 0.0:
                     self.emit_t = 0.1
@@ -76,9 +88,6 @@ class Mushroom(ppb.sprites.Sprite):
                 else:
                     self.emit_t -= ev.time_delta
             t = out_quad(self.smoosh_time) * 0.2
-            self.size = 2.0 * (1.0 - t)
-        else:
-            self.size = 2.0
         
         if perf_counter() - self.pressed_time <= 1.0:
             if debounce(self, 'apply_toxins', 0.5):
@@ -100,7 +109,7 @@ class Mushroom(ppb.sprites.Sprite):
 
 class MushroomPlacementMarker(ppb.Sprite):
     image: ppb.Image = ppb.Image("resources/mushroom/mushroom_0.png")
-    size: float = 2.0
+    size: float = 0.0
     layer: float = 200
     color = COLOR['WHITE']
 
