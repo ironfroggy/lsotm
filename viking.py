@@ -26,6 +26,7 @@ def dist(v1, v2):
 
 
 VIKING_ATK = Animation("resources/viking/l0_sprite_{1..7}.png", 10)
+VIKING_WALK = Animation("resources/viking/l0_sprite_{1..7}.png", 10)
 
 VIKING_BASE = [
     ppb.Image("resources/viking/l0_sprite_1.png")
@@ -69,6 +70,10 @@ class State:
 
 
 class ApproachState(State):
+
+    @staticmethod
+    def enter_state(self):
+        self.sprite_base.image = VIKING_WALK
 
     @staticmethod
     def on_update(self, ev, signal):
@@ -199,7 +204,7 @@ class Viking(ppb.Sprite):
         layer = pos_to_layer(self.position)
         if self.sprite_base is None:
             self.sprite_base = ppb.Sprite(
-                image=Animation("resources/viking/l0_sprite_{1..7}.png", 10),
+                image=VIKING_WALK,
                 layer=layer,
                 size=2,
             )

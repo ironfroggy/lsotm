@@ -68,7 +68,7 @@ class Mushroom(ppb.sprites.Sprite):
             self.cloud_id = int(perf_counter() * 1000)
             self.pressed_time = perf_counter()
             self.toxic_radius = 0.5
-            tweening.tween(self, "toxic_radius", 1.5, 1.0, easing='out_quad')
+            tweening.tween(self, "toxic_radius", 2.0, 1.0, easing='out_quad')
     
     def on_button_released(self, ev: ButtonReleased, signal):
         self.smooshed = False
@@ -80,7 +80,7 @@ class Mushroom(ppb.sprites.Sprite):
             i = tweening.lerp(0, 3, out_quad(self.smoosh_time * 2.0))
             self.image = MUSHROOM_SPRITES[i]
 
-            if self.smoosh_time < 0.5:
+            if self.smoosh_time < 1.0:
                 if self.emit_t <= 0.0:
                     self.emit_t = 0.1
                     signal(EmitCloud(self.position, self.cloud_id))
@@ -90,11 +90,11 @@ class Mushroom(ppb.sprites.Sprite):
             t = out_quad(self.smoosh_time) * 0.2
         
         if perf_counter() - self.pressed_time <= 1.0:
-            if debounce(self, 'apply_toxins', 0.5):
+            if debounce(self, 'apply_toxins', 0.25):
                 for viking in ev.scene.get(tag='viking'):
                     d = (viking.position - self.position).length
                     if d <= self.toxic_radius + 0.5:
-                        viking.on_mushroom_attack(MushroomAttack(self.cloud_id, viking), signal)
+                        viking.on_mushroom_attack(MushroomAttack(perf_counter(), viking), signal)
 
     def on_pre_render(self, ev, signal):
         self.layer = pos_to_layer(self.position)
