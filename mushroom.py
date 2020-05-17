@@ -12,6 +12,10 @@ from events import ScorePoints
 from floatingnumbers import CreateFloatingNumber
 import tweening
 import ui
+from controllers.meters import MeterUpdate, MeterRemove
+from controllers.meters import CtrlMeter
+
+from utils.imagesequence import Sequence 
 
 from cloud import MushroomAttack
 
@@ -24,6 +28,9 @@ MUSHROOM_SPRITES = [
     ppb.Image("resources/mushroom/mushroom_2.png"),
     ppb.Image("resources/mushroom/mushroom_3.png"),
 ]
+
+FRAMES_HEALTH = Sequence("resources/meter/l3_meter_{1..13}.png")
+FRAMES_TOXINS = Sequence("resources/meter/l4_meter_{1..13}.png")
 
 
 @dataclass
@@ -51,6 +58,8 @@ class Mushroom(ppb.sprites.Sprite):
     size: float = 2.0
 
     health: int = 10
+    toxins: float = 1.0
+    cloud: float = 0.0
 
     smooshed: bool = False
     smoosh_time: float = 0.0
@@ -75,19 +84,23 @@ class Mushroom(ppb.sprites.Sprite):
         self.image = MUSHROOM_SPRITES[0]
 
     def on_update(self, ev: Update, signal):
-        if self.smooshed:
+        if self.toxins and self.smooshed:
             self.smoosh_time = min(1.0, self.smoosh_time + ev.time_delta)
             i = tweening.lerp(0, 3, out_quad(self.smoosh_time * 2.0))
             self.image = MUSHROOM_SPRITES[i]
+            self.toxins = max(0.0, self.toxins - ev.time_delta)
+            self.cloud = self.cloud + ev.time_delta
 
-            if self.smoosh_time < 1.0:
-                if self.emit_t <= 0.0:
-                    self.emit_t = 0.1
-                    signal(EmitCloud(self.position, self.cloud_id))
-                    self.pressed_time = perf_counter()
-                else:
-                    self.emit_t -= ev.time_delta
-            t = out_quad(self.smoosh_time) * 0.2
+            if self.cloud >= 0.25:
+                signal(EmitCloud(self.position, self.cloud_id))
+                signal(MeterUpdate(self, 'toxins', self.toxins))
+                self.pressed_time = perf_counter()
+                self.cloud -= 0.25
+
+        elif not self.smooshed:
+            self.toxins = min(1.0, self.toxins + ev.time_delta * 0.5)
+            self.cloud = 0.0
+            signal(MeterUpdate(self, 'toxins', self.toxins))
         
         if perf_counter() - self.pressed_time <= 1.0:
             if debounce(self, 'apply_toxins', 0.25):
@@ -103,8 +116,10 @@ class Mushroom(ppb.sprites.Sprite):
         if ev.target is self:
             self.health = max(0, self.health - ev.dmg)
             signal(CreateFloatingNumber(-1, self.position, (255, 0, 0)))
+            signal(MeterUpdate(self, 'health', self.health / 10))
             if self.health <= 0:
                 ev.scene.remove(self)
+                signal(MeterRemove(self))
 
 
 class MushroomPlacementMarker(ppb.Sprite):
@@ -116,12 +131,22 @@ class MushroomPlacementMarker(ppb.Sprite):
 
 class MushroomPlacement(System):
 
+    def create_mushroom(self, position, signal):
+        mushroom = Mushroom(position=position, layer=10)
+        self.scene.add(mushroom, tags=['mushroom'])
+        CtrlMeter.create(self.scene, FRAMES_HEALTH, target=mushroom, attr='health', track=mushroom)
+        CtrlMeter.create(self.scene, FRAMES_TOXINS, target=mushroom, attr='toxins', track=mushroom)
+        signal(MeterUpdate(mushroom, 'health', 1.0))
+
     def on_scene_started(self, ev, signal):
+        self.scene = ev.scene
         self.mode = "waiting"
         self.marker = MushroomPlacementMarker()
         ev.scene.add(self.marker)
         signal(ui.CreateButton("Mushroom", enabled=False))
         signal(ui.DisableButton("Mushroom"))
+
+        self.create_mushroom(ppb.Vector(0, 0), signal)
     
     def on_score_updated(self, ev, signal):
         if ev.points >= 3:
@@ -136,17 +161,14 @@ class MushroomPlacement(System):
     
     def on_button_released(self, ev, signal):
         if self.mode == "placing" and self.can_place:
-            ev.scene.add(Mushroom(
-                position=ev.position,
-                layer=10,
-            ), tags=['mushroom'])
+            self.create_mushroom(ev.position, signal)
             self.mode = "waiting"
             signal(ScorePoints(-3))
             self.marker.size = 0.0
     
     def on_mouse_motion(self, ev, signal):
+        self.marker.position = ev.position
         if self.mode == "placing":
-            self.marker.position = ev.position
             closest = 100.0
             for mushroom in ev.scene.get(tag='mushroom'):
                 d = (mushroom.position - ev.position).length

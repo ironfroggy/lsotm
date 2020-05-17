@@ -313,9 +313,6 @@ def setup(scene):
         layer=-1,
     ), tags=['bg'])
 
-    scene.add(Mushroom(
-        layer=10,
-    ), tags=['mushroom'])
 
 
 ppb.run(

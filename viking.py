@@ -79,7 +79,9 @@ class ApproachState(State):
     def on_update(self, ev, signal):
         t = time.monotonic()
         if not self.target or not self.target.health:
-            self.target = choice(list(ev.scene.get(tag='mushroom')))
+            mushrooms = list(ev.scene.get(tag='mushroom'))
+            if mushrooms:
+                self.target = choice(mushrooms)
         d = dist(self.position, self.target.position)
         if d >= 1.5:
             h = (self.target.position - self.position).normalize()
