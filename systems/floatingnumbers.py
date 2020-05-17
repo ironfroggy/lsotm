@@ -4,8 +4,8 @@ import typing
 import ppb
 from ppb.systemslib import System
 
-from text import Text
-from tweening import tween
+from systems.text import Text
+from systems.tweening import tween
 
 
 @dataclass

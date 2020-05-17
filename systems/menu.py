@@ -4,8 +4,8 @@ from ppb.assets import Square
 from ppb.systemslib import System
 
 from events import *
-from text import Text
-from tweening import tween
+from systems.text import Text
+from systems.tweening import tween
 
 V = ppb.Vector
 

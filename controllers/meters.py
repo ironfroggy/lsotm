@@ -5,9 +5,6 @@ import ppb
 from utils.imagesequence import Sequence
 
 
-
-
-
 @dataclass
 class MeterUpdate:
     target: object

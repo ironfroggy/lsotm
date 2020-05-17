@@ -6,6 +6,7 @@ from ppb.systemslib import System
 
 import easing
 
+
 def ilerp(f1, f2, t):
     return int(f1 + t * (f2 - f1))
 

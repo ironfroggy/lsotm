@@ -8,9 +8,8 @@ from ppb.systemslib import System
 from ppb.events import ButtonPressed, ButtonReleased, Update
 
 from easing import out_quad
-import tweening
-
-from spritedepth import pos_to_layer
+from systems import tweening
+from utils.spritedepth import pos_to_layer
 
 
 @dataclass

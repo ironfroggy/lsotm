@@ -1,4 +1,8 @@
-from ppb.systems import Renderer
+import ctypes
+import io
+import logging
+import random
+from time import monotonic
 
 from sdl2 import (
     SDL_BLENDMODE_ADD,
@@ -9,17 +13,12 @@ from sdl2 import (
     SDL_QueryTexture,
     SDL_Rect,
 )
-import ppb.flags as flags
-from ppb.systems._sdl_utils import sdl_call
-
-import ctypes
-import io
-import logging
-import random
-from time import monotonic
-
 import sdl2
 import sdl2.ext
+
+import ppb.flags as flags
+from ppb.systems._sdl_utils import sdl_call
+from ppb.systems import Renderer
 
 
 class CustomRenderer(Renderer):

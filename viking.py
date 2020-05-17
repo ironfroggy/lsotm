@@ -1,22 +1,20 @@
 from dataclasses import dataclass
 import math
-from random import choice
+from random import choice, randint
 import time
+import typing
 
 import ppb
 from ppb.events import ButtonPressed, ButtonReleased, Update
 from ppb.features.animation import Animation
 
+from constants import COLOR
 from easing import out_quad
 from events import ScorePoints
-from floatingnumbers import CreateFloatingNumber
-from statemachine import StateMachine
-import tweening
-import typing
-
-from constants import COLOR
-
-from spritedepth import pos_to_layer
+from systems import tweening
+from systems.floatingnumbers import CreateFloatingNumber
+from utils.statemachine import StateMachine
+from utils.spritedepth import pos_to_layer
 
 
 def dist(v1, v2):
@@ -233,4 +231,15 @@ class Viking(ppb.Sprite):
     
     def on_mushroom_attack(self, ev, signal):
         self.state.on_mushroom_attack(self, ev, signal)
-    # on_mushroom_attack = state_method('on_mushroom_attack')
+
+
+class VikingSpawn(ppb.systemslib.System):
+
+    def on_update(self, ev, signal):
+        vikings = list(ev.scene.get(tag='viking'))
+        if not vikings:
+            for i in range(randint(1, 5)):
+                ev.scene.add(Viking(
+                    layer=10,
+                    position=ppb.Vector(5, i).rotate(randint(0, 360)),
+                ), tags=['viking'])

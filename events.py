@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from tweening import Tweener
 
 
 @dataclass
@@ -40,7 +39,7 @@ class MovementDone:
 
 @dataclass
 class TweeningDone:
-    tweener: Tweener
+    tweener: 'systems.tweening.Tweener'
 
 @dataclass
 class SeedCorruption:
