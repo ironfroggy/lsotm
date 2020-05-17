@@ -59,7 +59,7 @@ class State:
     @staticmethod
     def on_mushroom_attack(self, ev, signal):
         t = time.monotonic()
-        if t - self.last_hit >= 1.0 and self.last_hit_by < ev.cloud_id and self is ev.target:
+        if self.last_hit_by < ev.cloud_id and self is ev.target:
             self.set_state('cooldown')
             self.last_hit = t
             self.last_hit_by = ev.cloud_id
@@ -243,5 +243,5 @@ class VikingSpawn(ppb.systemslib.System):
             for i in range(randint(1, 5)):
                 ev.scene.add(Viking(
                     layer=10,
-                    position=ppb.Vector(5, i).rotate(randint(0, 360)),
+                    position=ppb.Vector(0, randint(5, 10)).rotate(randint(0, 360)),
                 ), tags=['viking'])

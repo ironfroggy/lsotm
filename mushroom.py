@@ -6,6 +6,7 @@ import ppb
 from ppb.events import ButtonPressed, ButtonReleased, Update
 from ppb.systemslib import System
 
+import constants
 from constants import COLOR
 from easing import out_quad
 from events import ScorePoints
@@ -102,26 +103,22 @@ class Mushroom(ppb.sprites.Sprite):
 
             # If the cloud accumulator reaches threashold,
             # emit clouds and clear the accumulator.
-            if self.cloud >= 0.25:
+            if self.cloud >= constants.SMOOSHROOM_TOXIN_DMG_RATE:
                 signal(EmitCloud(self.position, self.cloud_id))
                 self.pressed_time = perf_counter()
-                self.cloud -= 0.25
+                self.cloud -= constants.SMOOSHROOM_TOXIN_DMG_RATE
 
-        # If the mushroom isn't being smooshed, increase toxin accumulator
-        # and reset the cloud accumulator.
-        elif not self.smooshed:
-            self.toxins = min(1.0, self.toxins + ev.time_delta * 0.5)
-            self.cloud = 0.0
-            signal(MeterUpdate(self, 'toxins', self.toxins))
-
-        # If the mushroom has been pressed for less than a second, apply
-        # toxin damage every 0.25 seconds within the toxin radius.
-        if perf_counter() - self.pressed_time <= 1.0:
-            if debounce(self, 'apply_toxins', 0.25):
                 for viking in ev.scene.get(tag='viking'):
                     d = (viking.position - self.position).length
                     if d <= self.toxic_radius + 0.5:
                         viking.on_mushroom_attack(MushroomAttack(perf_counter(), viking), signal)
+
+        # If the mushroom isn't being smooshed, increase toxin accumulator
+        # and reset the cloud accumulator.
+        elif not self.smooshed:
+            self.toxins = min(1.0, self.toxins + ev.time_delta * constants.SMOOSHROOM_TOXIN_CHARGE)
+            self.cloud = 0.0
+            signal(MeterUpdate(self, 'toxins', self.toxins))
 
     def on_pre_render(self, ev, signal):
         self.layer = pos_to_layer(self.position)

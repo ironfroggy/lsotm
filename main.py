@@ -23,6 +23,7 @@ from systems.text import Text
 from systems.menu import MenuSystem
 from systems.particles import ParticleSystem
 from systems.scoring import ScoreBoard
+from systems.tilemap import TilemapSystem
 from systems import ui
 
 from cloud import CloudSystem
@@ -34,14 +35,9 @@ from events import *
 
 
 def setup(scene):
-    # text = Text("Hello, World", V(0, -4))
-    # scene.add(text)
-
-    scene.add(ppb.Sprite(
-        image=ppb.Image("resources/BACKGROUND.png"),
-        size=12,
-        layer=-1,
-    ), tags=['bg'])
+    def zoom():
+        scene.main_camera.width = 20.1
+    delay(1, zoom)
 
 
 ppb.run(
@@ -57,6 +53,7 @@ ppb.run(
         VikingSpawn,
         ui.UISystem,
         MushroomPlacement,
+        TilemapSystem,
         FloatingNumberSystem,
     ],
     resolution=(1280, 720),
