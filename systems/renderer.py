@@ -83,9 +83,15 @@ class CustomRenderer(Renderer):
             win_h = rect[3] * game_object.size
         else:
             src_rect = SDL_Rect(x=0, y=0, w=img_w, h=img_h)
-            win_w, win_h = self.target_resolution(img_w.value, img_h.value, game_object.size)
+            if hasattr(game_object, 'width'):
+                obj_w = game_object.width
+                obj_h = game_object.height
+            else:
+                obj_w, obj_h = game_object.size
 
-        center = camera.translate_to_viewport(game_object.position)
+            win_w, win_h = self.target_resolution(img_w.value, img_h.value, obj_w, obj_h, camera.pixel_ratio)
+
+        center = camera.translate_point_to_screen(game_object.position)
         dest_rect = SDL_Rect(
             x=int(center.x - win_w / 2),
             y=int(center.y - win_h / 2),

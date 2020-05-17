@@ -42,12 +42,14 @@ VIKING_CLOTHES = [
 ]
 
 
+# TODO: Replace with direct method and command attacker/attackee interface
 @dataclass
 class VikingAttack:
     target: 'mushroom.Mushroom'
     dmg: int
 
 
+# TODO: Make this not suck...?
 class State:
     
     @staticmethod

@@ -44,7 +44,6 @@ def setup(scene):
     ), tags=['bg'])
 
 
-
 ppb.run(
     setup=setup,
     basic_systems=(CustomRenderer, Updater, EventPoller, SoundController, AssetLoadingSystem),

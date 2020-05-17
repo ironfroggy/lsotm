@@ -60,11 +60,12 @@ class Mushroom(ppb.sprites.Sprite):
     toxins: float = 1.0
     cloud: float = 0.0
 
+    # TODO: Can any of these be combined?
     smooshed: bool = False
     smoosh_time: float = 0.0
     pressed_time: float = 0.0
-
     emit_t: float = 0.0
+
     cloud_id: int = 0
     toxic_radius: float = 0.0
     
@@ -75,11 +76,14 @@ class Mushroom(ppb.sprites.Sprite):
             self.smoosh_time = 0.0
             self.cloud_id = int(perf_counter() * 1000)
             self.pressed_time = perf_counter()
+
+            # TODO: This is pretty cludging and won't always match the visual clouds
             self.toxic_radius = 0.5
             tweening.tween(self, "toxic_radius", 2.0, 1.0, easing='out_quad')
     
     def on_button_released(self, ev: ButtonReleased, signal):
         self.smooshed = False
+        # TODO: Animate the bounce back
         self.image = MUSHROOM_SPRITES[0]
 
     def on_update(self, ev: Update, signal):
@@ -121,7 +125,7 @@ class Mushroom(ppb.sprites.Sprite):
 
     def on_pre_render(self, ev, signal):
         self.layer = pos_to_layer(self.position)
-    
+
     def on_viking_attack(self, ev, signal):
         if ev.target is self:
             self.health = max(0, self.health - ev.dmg)
@@ -140,10 +144,31 @@ class MushroomPlacementMarker(ppb.Sprite):
 
 
 class MushroomPlacement(System):
+    """The Mushroom Placement System is responsible for:
+    - Invoking the UI elements for selecting new units to place
+    - Allowing the user to place new units
+    - Initializing the scene with the first units for a level
 
+    The system listens to these events:
+    - SceneStarted
+    - ScoreUpdated
+    - UIButtonPressed
+    - ButtonReleased
+    - MouseMotion
+
+    The system sends these events:
+    - ScorePoints
+    - CreateButton
+    - EnableButton
+    - DisableButton
+    - MeterUpdate
+    """
+
+    # TODO: Create mushrooms through events
     def create_mushroom(self, position, signal):
         mushroom = Mushroom(position=position, layer=10)
         self.scene.add(mushroom, tags=['mushroom'])
+        # TODO: Create meters through events
         CtrlMeter.create(self.scene, FRAMES_HEALTH, target=mushroom, attr='health', track=mushroom)
         CtrlMeter.create(self.scene, FRAMES_TOXINS, target=mushroom, attr='toxins', track=mushroom)
         signal(MeterUpdate(mushroom, 'health', 1.0))
