@@ -1,6 +1,7 @@
 import ppb
 from ppb.systemslib import System
 
+from events import ScoreUpdated
 from systems.text import Text
 from constants import COLOR
 

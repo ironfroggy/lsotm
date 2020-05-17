@@ -83,24 +83,35 @@ class Mushroom(ppb.sprites.Sprite):
         self.image = MUSHROOM_SPRITES[0]
 
     def on_update(self, ev: Update, signal):
+        # If the mushroom is being smooshed and it has toxins to squish...
         if self.toxins and self.smooshed:
-            self.smoosh_time = min(1.0, self.smoosh_time + ev.time_delta)
+
+            # Set smoosh frame
             i = tweening.lerp(0, 3, out_quad(self.smoosh_time * 2.0))
             self.image = MUSHROOM_SPRITES[i]
+
+            # Accumulate cloud counter from toxin counter
+            self.smoosh_time = min(1.0, self.smoosh_time + ev.time_delta)
             self.toxins = max(0.0, self.toxins - ev.time_delta)
             self.cloud = self.cloud + ev.time_delta
+            signal(MeterUpdate(self, 'toxins', self.toxins))
 
+            # If the cloud accumulator reaches threashold,
+            # emit clouds and clear the accumulator.
             if self.cloud >= 0.25:
                 signal(EmitCloud(self.position, self.cloud_id))
-                signal(MeterUpdate(self, 'toxins', self.toxins))
                 self.pressed_time = perf_counter()
                 self.cloud -= 0.25
 
+        # If the mushroom isn't being smooshed, increase toxin accumulator
+        # and reset the cloud accumulator.
         elif not self.smooshed:
             self.toxins = min(1.0, self.toxins + ev.time_delta * 0.5)
             self.cloud = 0.0
             signal(MeterUpdate(self, 'toxins', self.toxins))
-        
+
+        # If the mushroom has been pressed for less than a second, apply
+        # toxin damage every 0.25 seconds within the toxin radius.
         if perf_counter() - self.pressed_time <= 1.0:
             if debounce(self, 'apply_toxins', 0.25):
                 for viking in ev.scene.get(tag='viking'):
