@@ -24,10 +24,11 @@ from systems.menu import MenuSystem
 from systems.particles import ParticleSystem
 from systems.scoring import ScoreBoard
 from systems.tilemap import TilemapSystem
+from systems.unitplacement import MushroomPlacement
 from systems import ui
 
 from cloud import CloudSystem
-from mushroom import Mushroom, MushroomPlacement
+
 from viking import Viking, VikingSpawn
 
 from constants import COLOR
