@@ -6,8 +6,7 @@ import ppb
 from ppb.events import ButtonPressed, ButtonReleased, Update
 from ppb.systemslib import System
 
-import constants
-from constants import COLOR
+import constants as C
 from easing import out_quad
 from events import ScorePoints
 
@@ -56,7 +55,7 @@ class Smooshroom(Mushroom):
         clicked = super().on_button_pressed(ev, signal)
         if clicked:
             # TODO: This is pretty cludging and won't always match the visual clouds
-            tweening.tween(self, "cloud_radius", 2.0, 1.0, easing='out_quad')
+            tweening.tween(self, "cloud_radius", C.SMOOSHROOM_CLOUD_RADIUS_MAX, C.SMOOSHROOM_CLOUD_RADIUS_TIME, easing='out_quad')
             self.cloud_radius = 0.5
             self.cloud_id = int(perf_counter() * 1000)
 
@@ -76,10 +75,10 @@ class Smooshroom(Mushroom):
 
             # If the cloud accumulator reaches threashold,
             # emit clouds and clear the accumulator.
-            if self.cloud >= constants.SMOOSHROOM_TOXIN_DMG_RATE:
+            if self.cloud >= C.SMOOSHROOM_TOXIN_DMG_RATE:
                 signal(EmitCloud(self.position, self.cloud_id))
                 self.pressed_time = perf_counter()
-                self.cloud -= constants.SMOOSHROOM_TOXIN_DMG_RATE
+                self.cloud -= C.SMOOSHROOM_TOXIN_DMG_RATE
 
                 for viking in ev.scene.get(tag='viking'):
                     d = (viking.position - self.position).length
@@ -89,6 +88,6 @@ class Smooshroom(Mushroom):
         # If the mushroom isn't being smooshed, increase toxin accumulator
         # and reset the cloud accumulator.
         elif not self.smooshed:
-            self.toxins = min(1.0, self.toxins + ev.time_delta * constants.SMOOSHROOM_TOXIN_CHARGE)
+            self.toxins = min(1.0, self.toxins + ev.time_delta * C.SMOOSHROOM_TOXIN_CHARGE)
             self.cloud = 0.0
             signal(MeterUpdate(self, 'toxins', self.toxins))
