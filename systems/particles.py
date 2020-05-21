@@ -2,7 +2,8 @@ from random import random
 
 import ppb
 
-from systems.tweening import Tweener
+from ppb_tween import Tweener
+
 from constants import COLOR
 
 

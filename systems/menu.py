@@ -5,7 +5,9 @@ from ppb.systemslib import System
 
 from events import *
 from systems.text import Text
-from systems.tweening import tween
+
+from ppb_tween import tween
+
 
 V = ppb.Vector
 
@@ -29,18 +31,18 @@ class MenuSystem(System):
             signal(OpenMenu())
     
     def close_menu(self):
-        tween(self.bg, 'size', 0.0, 1.0, easing='out_bounce')
-        tween(self.opt_start, 'size', 0.0, 0.5, easing='in_quad')
-        tween(self.opt_quit, 'size', 0.0, 0.5, easing='in_quad')
-        tween(self.title, 'size', 0.0, 0.5, easing='in_quad')
+        tween(self.bg, 'size', 0.0, 1.0, easing='bounce_out')
+        tween(self.opt_start, 'size', 0.0, 0.5, easing='quad_in')
+        tween(self.opt_quit, 'size', 0.0, 0.5, easing='quad_in')
+        tween(self.title, 'size', 0.0, 0.5, easing='quad_in')
 
         self.menu_active = False
     
     def open_menu(self):
-        tween(self.bg, 'size', 8.0, 1.0, easing='out_bounce')
-        tween(self.opt_start, 'size', 2.0, 1.0, easing='out_bounce')
-        tween(self.opt_quit, 'size', 2.0, 1.0, easing='out_bounce')
-        tween(self.title, 'size', 2.0, 1.0, easing='out_bounce')
+        tween(self.bg, 'size', 8.0, 1.0, easing='bounce_out')
+        tween(self.opt_start, 'size', 2.0, 1.0, easing='bounce_out')
+        tween(self.opt_quit, 'size', 2.0, 1.0, easing='bounce_out')
+        tween(self.title, 'size', 2.0, 1.0, easing='bounce_out')
 
         self.menu_active = True
 

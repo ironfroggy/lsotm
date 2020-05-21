@@ -7,9 +7,10 @@ import ppb
 from ppb.systemslib import System
 from ppb.events import ButtonPressed, ButtonReleased, Update
 
-from easing import out_quad
-from systems import tweening
+import constants as C
 from utils.spritedepth import pos_to_layer
+
+import ppb_tween as tweening
 
 
 @dataclass
@@ -50,11 +51,11 @@ class CloudSystem(System):
         r = 360 / self.STEPS
         for i in range(self.STEPS):
             w = random.randrange(-r//2, r//2)
-            heading = ppb.Vector(1.5, 0).rotate(w + r * i)
+            heading = ppb.Vector(C.SMOOSHROOM_CLOUD_RADIUS_MAX, 0).rotate(w + r * i)
             cloud = Cloud(heading=heading, position=ev.position, cloud_id=ev.cloud_id)
             cloud.size = 0.0
             ev.scene.add(cloud)
 
-            tweening.tween(cloud, "position", ev.position + heading, 1.0, easing='out_quad')
-            tweening.tween(cloud, "size", 1.0, 1.0, easing='linear')
-            tweening.tween(cloud, "opacity", 0, 1.0, easing='in_quint')
+            tweening.tween(cloud, "position", ev.position + heading, 1.0, easing='quint_out')
+            tweening.tween(cloud, "size", 1.0, 1.0, easing='quad_out')
+            tweening.tween(cloud, "opacity", 0.0, 1.0, easing='linear')

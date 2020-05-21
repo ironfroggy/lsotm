@@ -8,10 +8,10 @@ import ppb
 from ppb.events import ButtonPressed, ButtonReleased, Update
 from ppb.features.animation import Animation
 
+import ppb_tween as tweening
+
 from constants import COLOR
-from easing import out_quad
 from events import ScorePoints
-from systems import tweening
 from systems.floatingnumbers import CreateFloatingNumber
 from utils.statemachine import StateMachine
 from utils.spritedepth import pos_to_layer

@@ -6,15 +6,12 @@ import ppb
 from ppb.events import ButtonPressed, ButtonReleased, Update
 from ppb.systemslib import System
 
+import ppb_tween as tweening
+
 import constants as C
-from easing import out_quad
 from events import ScorePoints
-
-from systems import tweening
 from controllers.meters import MeterUpdate, MeterRemove
-
 from cloud import MushroomAttack
-
 from .base import Mushroom
 
 
@@ -55,7 +52,7 @@ class Smooshroom(Mushroom):
         clicked = super().on_button_pressed(ev, signal)
         if clicked:
             # TODO: This is pretty cludging and won't always match the visual clouds
-            tweening.tween(self, "cloud_radius", C.SMOOSHROOM_CLOUD_RADIUS_MAX, C.SMOOSHROOM_CLOUD_RADIUS_TIME, easing='out_quad')
+            tweening.tween(self, "cloud_radius", C.SMOOSHROOM_CLOUD_RADIUS_MAX, C.SMOOSHROOM_CLOUD_RADIUS_TIME, easing='quad_out')
             self.cloud_radius = 0.5
             self.cloud_id = int(perf_counter() * 1000)
 
@@ -64,7 +61,9 @@ class Smooshroom(Mushroom):
         if self.toxins and self.smooshed:
 
             # Set smoosh frame
-            i = tweening.lerp(0, 3, out_quad(self.smoosh_time * 2.0))
+            t = tweening.EASING['quad_out'](self.smoosh_time)
+            assert 0.0 <= t <= 1.0
+            i = tweening.lerp(0, 3, t)
             self.image = MUSHROOM_SPRITES[i]
 
             # Accumulate cloud counter from toxin counter

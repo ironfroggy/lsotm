@@ -5,7 +5,8 @@ import ppb
 from ppb.systemslib import System
 
 from systems.text import Text
-from systems.tweening import tween
+
+from ppb_tween import tween
 
 
 @dataclass

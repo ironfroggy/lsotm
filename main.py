@@ -15,9 +15,10 @@ from ppb.systems import EventPoller
 from ppb.systems import SoundController
 from ppb.systems import Updater
 
+from ppb_tween import Tweener, Tweening, tween
+
 from systems.floatingnumbers import FloatingNumberSystem
 from systems.timer import Timers, delay, repeat, cancel
-from systems.tweening import Tweener, TweenSystem, tween
 from systems.renderer import CustomRenderer
 from systems.text import Text
 from systems.menu import MenuSystem
@@ -46,7 +47,7 @@ ppb.run(
     basic_systems=(CustomRenderer, Updater, EventPoller, SoundController, AssetLoadingSystem),
     systems=[
         MenuSystem,
-        TweenSystem,
+        Tweening,
         Timers,
         ParticleSystem,
         ScoreBoard,
