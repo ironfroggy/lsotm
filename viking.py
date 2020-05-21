@@ -59,10 +59,11 @@ class State:
     @staticmethod
     def on_mushroom_attack(self, ev, signal):
         t = time.monotonic()
-        if self.last_hit_by < ev.cloud_id and self is ev.target:
-            self.set_state('cooldown')
-            self.last_hit = t
-            self.last_hit_by = ev.cloud_id
+        if (ev.cloud_id is None or self.last_hit_by < ev.cloud_id) and self is ev.target:
+            if ev.cloud_id is not None:
+                self.set_state('cooldown')
+                self.last_hit = t
+                self.last_hit_by = ev.cloud_id
             self.hp -= 1
             if self.hp <= 0:
                 self.set_state('dieing')
@@ -176,7 +177,7 @@ def state_method(name):
 
 class Viking(ppb.Sprite):
     size: float = 0.0
-    speed: float = 0.25
+    speed: float = 0.5
     hp: int = 3
     last_hit: float = 0.0
     last_hit_by: int = 0

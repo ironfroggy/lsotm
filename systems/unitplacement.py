@@ -2,12 +2,12 @@ import ppb
 
 from constants import COLOR
 from controllers.meters import CtrlMeter
-from mushroom import Smooshroom
 from systems import ui
 from utils.imagesequence import Sequence 
 from controllers.meters import MeterUpdate, MeterRemove
 from events import ScorePoints, ScoreUpdated
 
+from mushroom import Smooshroom, Poddacim
 
 FRAMES_HEALTH = Sequence("resources/meter/l3_meter_{1..13}.png")
 FRAMES_TOXINS = Sequence("resources/meter/l4_meter_{1..13}.png")
@@ -42,9 +42,9 @@ class MushroomPlacement(ppb.systemslib.System):
     """
 
     # TODO: Create mushrooms through events
-    def create_mushroom(self, position, signal):
+    def create_mushroom(self, cls, position, signal):
         # TODO: create different kinds
-        mushroom = Smooshroom(position=position, layer=10)
+        mushroom = cls(position=position, layer=10)
         self.scene.add(mushroom, tags=['mushroom'])
         # TODO: Create meters through events
         CtrlMeter.create(self.scene, FRAMES_HEALTH, target=mushroom, attr='health', track=mushroom)
@@ -56,25 +56,38 @@ class MushroomPlacement(ppb.systemslib.System):
         self.mode = "waiting"
         self.marker = MushroomPlacementMarker()
         ev.scene.add(self.marker)
-        signal(ui.CreateButton("Mushroom", enabled=False))
-        signal(ui.DisableButton("Mushroom"))
+        
+        signal(ui.CreateButton("Smooshroom", enabled=False))
+        signal(ui.DisableButton("Smooshroom"))
 
-        self.create_mushroom(ppb.Vector(0, 0), signal)
+        signal(ui.CreateButton("Poddacim", enabled=False))
+        signal(ui.DisableButton("Poddacim"))
+
+        self.create_mushroom(Smooshroom, ppb.Vector(0, 0), signal)
     
     def on_score_updated(self, ev, signal):
         if ev.points >= 3:
-            signal(ui.EnableButton("Mushroom"))
+            signal(ui.EnableButton("Smooshroom"))
+            signal(ui.EnableButton("Poddacim"))
         else:
-            signal(ui.DisableButton("Mushroom"))
+            signal(ui.DisableButton("Smooshroom"))
+            signal(ui.DisableButton("Poddacim"))
 
     def on_ui_button_pressed(self, ev, signal):
-        if ev.label == "Mushroom":
+        if ev.label == "Smooshroom":
             self.mode = "placing"
+            self.place_type = Smooshroom
             self.marker.size = 2.0
+            self.marker.image = self.place_type.smoosh_sprites[0]
+        if ev.label == "Poddacim":
+            self.mode = "placing"
+            self.place_type = Poddacim
+            self.marker.size = 2.0
+            self.marker.image = self.place_type.smoosh_sprites[0]
     
     def on_button_released(self, ev, signal):
         if self.mode == "placing" and self.can_place:
-            self.create_mushroom(ev.position, signal)
+            self.create_mushroom(self.place_type, ev.position, signal)
             self.mode = "waiting"
             signal(ScorePoints(-3))
             self.marker.size = 0.0

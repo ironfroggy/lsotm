@@ -42,6 +42,8 @@ class UIButtonPressed:
 
 
 class UIButton(ppb.Sprite):
+    image = ppb.Image("resources/uibutton.png")
+    size = 2.0
     label: str
     enabled: bool = True
 
@@ -79,11 +81,11 @@ class UISystem(System):
             del self.ui_elements[ev.label]
 
         element = UIButton(label=ev.label, enabled=ev.enabled)
-        element.position = ppb.Vector(-5 + len(self.ui_elements), 5)
+        element.position = ppb.Vector(-5 + len(self.ui_elements) * 2.0, 5)
         ev.scene.add(element)
         self.ui_elements[ev.label] = element
 
-        label = text.Text(ev.label, position=element.position)
+        label = text.Text(ev.label, position=element.position, size=1.0)
         label.scene = ev.scene
         ev.scene.add(label)
         label.setup()

@@ -1,7 +1,7 @@
 import ppb
 
 
-KERNING = 0.8
+KERNING = 0.15
 FONTSHEET = ppb.Image("resources/font2.png")
 # LEGEND = """ !"#$%&'
 # <>*+,-./
@@ -32,7 +32,6 @@ pqrstuvwxyz{|}~
 class Letter(ppb.Sprite):
     image = FONTSHEET
     rect = (0, 0, 16, 16)
-    size = 2.0
 
     def __init__(self, char, color):
         super().__init__()
@@ -46,14 +45,14 @@ class Letter(ppb.Sprite):
 
 
 class Text:
-    def __init__(self, text, position, layer=100, align='center', color=(255, 255, 255)):
+    def __init__(self, text, position, layer=100, align='center', color=(255, 255, 255), size=2.0):
         self._position = position
         self.layer = layer
         self.align = align
         self.signal = None
         self.letters = []
         self._text = text
-        self._size = 2.0
+        self._size = size
         self._color = color
         self._opacity = 255
     
@@ -122,7 +121,7 @@ class Text:
         p = self.position
 
         if self.align == 'center':
-            align = -0.25 * len(self.text) * KERNING
+            align = -0.5 * len(self.text) * KERNING * self.size
         elif self.align == 'left':
             raise NotImplementedError()
         elif self.align == 'right':
@@ -132,7 +131,10 @@ class Text:
 
         for i, c in enumerate(self.text):
             l = Letter(c, self._color)
+            x = p.x + i * KERNING * self.size + align
+            y = p.y
             l.layer = self.layer
-            l.position = ppb.Vector(p.x + i/2*KERNING + align, p.y)
+            l.position = ppb.Vector(x, y)
+            l.size = self.size
             self.scene.add(l)
             self.letters.append(l)
