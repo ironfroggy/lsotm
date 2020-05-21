@@ -11,7 +11,6 @@ from constants import COLOR
 from easing import out_quad
 from events import ScorePoints
 
-from systems.floatingnumbers import CreateFloatingNumber
 from systems import tweening
 from controllers.meters import MeterUpdate, MeterRemove
 
