@@ -17,6 +17,7 @@ import ppb_tween as tweening
 class MushroomAttack:
     cloud_id: int
     target: 'viking.Viking'
+    dmg: int = 1
 
 
 class Cloud(ppb.sprites.Sprite):
