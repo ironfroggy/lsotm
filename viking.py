@@ -220,7 +220,6 @@ class Viking(ppb.Sprite):
 
             clothes_i = min(len(VIKING_CLOTHES), max(1, self.strength // 2)) - 1
             hat_i = min(len(VIKING_HAT), max(1, self.strength - clothes_i)) - 1
-            print(self.strength, clothes_i, hat_i)
             self.sprite_clothes = ppb.Sprite(image=VIKING_CLOTHES[clothes_i], layer=layer + 0.1, size=2)
             self.sprite_hat = ppb.Sprite(image=VIKING_HAT[hat_i], layer=layer + 0.1, size=2)
 

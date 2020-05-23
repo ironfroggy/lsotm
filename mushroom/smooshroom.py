@@ -11,6 +11,7 @@ import ppb_tween as tweening
 import constants as C
 from events import ScorePoints
 from controllers.meters import MeterUpdate, MeterRemove
+from systems.timer import delay
 from cloud import MushroomAttack
 from .base import Mushroom
 
@@ -52,9 +53,9 @@ class Smooshroom(Mushroom):
         clicked = super().on_button_pressed(ev, signal)
         if clicked:
             # TODO: This is pretty cludging and won't always match the visual clouds
-            tweening.tween(self, "cloud_radius", C.SMOOSHROOM_CLOUD_RADIUS_MAX, C.SMOOSHROOM_CLOUD_RADIUS_TIME, easing='quad_out')
             self.cloud_radius = 0.5
             self.cloud_id = int(perf_counter() * 1000)
+            tweening.tween(self, "cloud_radius", C.SMOOSHROOM_CLOUD_RADIUS_MAX, C.SMOOSHROOM_CLOUD_RADIUS_TIME, easing='quad_out')
 
     def on_update(self, ev: Update, signal):
         # If the mushroom is being smooshed and it has toxins to squish...
@@ -90,3 +91,14 @@ class Smooshroom(Mushroom):
             self.toxins = min(1.0, self.toxins + ev.time_delta * C.SMOOSHROOM_TOXIN_CHARGE)
             self.cloud = 0.0
             signal(MeterUpdate(self, 'toxins', self.toxins))
+
+    def on_viking_attack(self, ev, signal):
+        super().on_viking_attack(ev, signal)
+
+        self.smooshed = True
+
+        self.cloud_radius = 0.5
+        self.cloud_id = int(perf_counter() * 1000)
+        tweening.tween(self, "cloud_radius", C.SMOOSHROOM_CLOUD_RADIUS_MAX, C.SMOOSHROOM_CLOUD_RADIUS_TIME, easing='quad_out')
+
+        delay(0.25, lambda: setattr(self, 'smooshed', False))
