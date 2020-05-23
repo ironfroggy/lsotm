@@ -69,6 +69,8 @@ class DebugMessage:
     msg: str
 
 
+# TODO: Clear elements when scene ends / handle different scenes
+# Become a controller? Not sure yet.
 class UISystem(System):
 
     def __init__(self, *args, **kwargs):
@@ -77,7 +79,10 @@ class UISystem(System):
 
     def on_create_button(self, ev, signal):
         if ev.label in self.ui_elements:
-            ev.scene.remove(self.ui_elements[ev.label])
+            try:
+                ev.scene.remove(self.ui_elements[ev.label])
+            except KeyError:
+                pass
             del self.ui_elements[ev.label]
 
         element = UIButton(label=ev.label, enabled=ev.enabled)

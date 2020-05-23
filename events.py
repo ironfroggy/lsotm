@@ -5,6 +5,9 @@ from dataclasses import dataclass
 class StartGame:
     pass
 
+class RestartGame:
+    pass
+
 @dataclass
 class OpenMenu:
     pass

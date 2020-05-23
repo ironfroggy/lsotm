@@ -1,7 +1,7 @@
 import ppb
 
 
-KERNING = 0.15
+KERNING = 0.2
 FONTSHEET = ppb.Image("resources/font2.png")
 # LEGEND = """ !"#$%&'
 # <>*+,-./

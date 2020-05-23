@@ -242,9 +242,11 @@ class VikingSpawnCtrl:
     @classmethod
     def create(cls, scene):
         ctrl = cls()
-        ctrl.active = True
         scene.add(ctrl)
         return ctrl
+    
+    def start(self):
+        self.active = True
 
     def on_update(self, ev, signal):
         if self.active:

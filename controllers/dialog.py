@@ -1,13 +1,16 @@
 import ppb
 from ppb.keycodes import Escape
-from ppb.events import Quit
+from ppb.events import Quit, StopScene, StartScene
 from ppb.assets import Square
 from ppb.systemslib import System
 
 from events import *
 from systems.text import Text
+from systems.timer import delay
 
 from ppb_tween import tween
+
+import scenes
 
 
 V = ppb.Vector
@@ -35,19 +38,28 @@ class DialogCtrl:
         ctrl.title = Text('Last Stand of the Mushrooms', V(0, 2), layer=MENU_LAYER + 1, size=0.0)
         scene.add(ctrl.title)
 
-        ctrl.opt_start = Text('start', V(0, -1), layer=MENU_LAYER + 1, size=0.0)
+        ctrl.opt_start = Text('resume', V(0, -1), layer=MENU_LAYER + 1, size=0.0)
         scene.add(ctrl.opt_start)
 
-        ctrl.opt_quit = Text('quit', V(0, -2), layer=MENU_LAYER + 1, size=0.0)
+        ctrl.opt_restart = Text('restart', V(0, -2), layer=MENU_LAYER + 1, size=0.0)
+        scene.add(ctrl.opt_restart)
+
+        ctrl.opt_quit = Text('quit', V(0, -3), layer=MENU_LAYER + 1, size=0.0)
         scene.add(ctrl.opt_quit)
 
+        # TODO: Make this configurable
         ctrl.options = (
-            (ctrl.opt_start, lambda: signal(StartGame())),
+            (ctrl.opt_start, lambda: signal(StopScene())),
+            (ctrl.opt_restart, lambda: ctrl.restart_game(signal)),
             (ctrl.opt_quit, lambda: signal(Quit())),
         )
 
         scene.add(ctrl)
         return ctrl
+    
+    def restart_game(self, signal):
+        signal(StopScene())
+        delay(0, lambda: signal(RestartGame()))
 
     # TODO: Probably drop?
     def on_start_game(self, ev, signal):
@@ -67,6 +79,7 @@ class DialogCtrl:
     def close_menu(self):
         tween(self.bg, 'size', 0.0, 1.0, easing='bounce_out')
         tween(self.opt_start, 'size', 0.0, 0.5, easing='quad_in')
+        tween(self.opt_restart, 'size', 0.0, 0.5, easing='quad_in')
         tween(self.opt_quit, 'size', 0.0, 0.5, easing='quad_in')
         tween(self.title, 'size', 0.0, 0.5, easing='quad_in')
 
@@ -75,6 +88,7 @@ class DialogCtrl:
     def open_menu(self):
         tween(self.bg, 'size', 8.0, 1.0, easing='bounce_out')
         tween(self.opt_start, 'size', 2.0, 1.0, easing='bounce_out')
+        tween(self.opt_restart, 'size', 2.0, 1.0, easing='bounce_out')
         tween(self.opt_quit, 'size', 2.0, 1.0, easing='bounce_out')
         tween(self.title, 'size', 2.0, 1.0, easing='bounce_out')
 
@@ -91,7 +105,3 @@ class DialogCtrl:
 
                 if dy < 0.25 and dx < 1.5:
                     callback()
-    
-    def on_key_released(self, ev, signal):
-        if ev.key == Escape:
-            signal(ToggleMenu())

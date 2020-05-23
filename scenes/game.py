@@ -3,15 +3,28 @@ import ppb
 from controllers.unitplacement import UnitPlacementCtrl
 from controllers.tilemap import TilemapCtrl
 from controllers.scoring import ScoreCtrl
-from controllers.dialog import DialogCtrl
 from viking import VikingSpawnCtrl
+
+from scenes.paused import PausedScene
+from systems.timer import delay
 
 
 class GameScene(ppb.BaseScene):
 
     def on_scene_started(self, ev, signal):
-        TilemapCtrl.create(ev.scene)
-        VikingSpawnCtrl.create(ev.scene)
-        ScoreCtrl.create(ev.scene)
-        UnitPlacementCtrl.create(ev.scene, signal)
-        DialogCtrl.create(ev.scene, signal)
+        self.setup_scene(ev.scene, signal)
+    
+    def setup_scene(self, scene, signal):
+        TilemapCtrl.create(scene)
+        ScoreCtrl.create(scene)
+        UnitPlacementCtrl.create(scene, signal)
+
+        viking_ctrl = VikingSpawnCtrl.create(scene)
+        delay(1, viking_ctrl.start)
+
+    def on_key_released(self, ev, signal):
+        if ev.key == ppb.keycodes.Escape:
+            signal(ppb.events.StartScene(PausedScene))
+    
+    def on_restart_game(self, ev, signal):
+        signal(ppb.events.StopScene())
