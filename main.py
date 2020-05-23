@@ -21,7 +21,6 @@ from systems.floatingnumbers import FloatingNumberSystem
 from systems.timer import Timers, delay, repeat, cancel
 from systems.renderer import CustomRenderer
 from systems.text import Text
-from systems.menu import MenuSystem
 from systems.particles import ParticleSystem
 from systems import ui
 
@@ -33,14 +32,14 @@ from constants import COLOR
 from events import *
 
 
-from scenes.game import GameScene  
+from scenes.game import GameScene
+from scenes.title import TitleScene
 
 
 ppb.run(
-    starting_scene=GameScene,
+    starting_scene=TitleScene,
     basic_systems=(CustomRenderer, Updater, EventPoller, SoundController, AssetLoadingSystem),
     systems=[
-        MenuSystem,
         Tweening,
         Timers,
         ParticleSystem,

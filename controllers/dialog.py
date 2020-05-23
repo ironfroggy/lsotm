@@ -1,4 +1,5 @@
 import ppb
+from ppb.keycodes import Escape
 from ppb.events import Quit
 from ppb.assets import Square
 from ppb.systemslib import System
@@ -14,11 +15,41 @@ V = ppb.Vector
 MENU_LAYER = 1000
 
 
-# TODO: Rename to DialogSystem, I think
-class MenuSystem(System):
-    active: bool = False
+class DialogCtrl:
+    active: bool = True
     menu_active = True
 
+    @classmethod
+    def create(cls, scene, signal):
+        ctrl = cls()
+
+        G = 32
+        ctrl.bg = ppb.Sprite(
+            image=Square(G, G, G),
+            size=0.0,
+            layer=MENU_LAYER,
+            opacity=225,
+        )
+        scene.add(ctrl.bg)
+
+        ctrl.title = Text('Last Stand of the Mushrooms', V(0, 2), layer=MENU_LAYER + 1, size=0.0)
+        scene.add(ctrl.title)
+
+        ctrl.opt_start = Text('start', V(0, -1), layer=MENU_LAYER + 1, size=0.0)
+        scene.add(ctrl.opt_start)
+
+        ctrl.opt_quit = Text('quit', V(0, -2), layer=MENU_LAYER + 1, size=0.0)
+        scene.add(ctrl.opt_quit)
+
+        ctrl.options = (
+            (ctrl.opt_start, lambda: signal(StartGame())),
+            (ctrl.opt_quit, lambda: signal(Quit())),
+        )
+
+        scene.add(ctrl)
+        return ctrl
+
+    # TODO: Probably drop?
     def on_start_game(self, ev, signal):
         self.close_menu()
     
@@ -49,31 +80,6 @@ class MenuSystem(System):
 
         self.menu_active = True
 
-    def on_scene_started(self, ev, signal):
-
-        G = 32
-        self.bg = ppb.Sprite(
-            image=Square(G, G, G),
-            size=8.0,
-            layer=MENU_LAYER,
-            opacity=225,
-        )
-        ev.scene.add(self.bg)
-
-        self.title = Text('Last Stand of the Mushrooms', V(0, 2), layer=MENU_LAYER + 1)
-        ev.scene.add(self.title)
-
-        self.opt_start = Text('start', V(0, -1), layer=MENU_LAYER + 1)
-        ev.scene.add(self.opt_start)
-
-        self.opt_quit = Text('quit', V(0, -2), layer=MENU_LAYER + 1)
-        ev.scene.add(self.opt_quit)
-
-        self.options = (
-            (self.opt_start, lambda: signal(StartGame())),
-            (self.opt_quit, lambda: signal(Quit())),
-        )
-
     def on_button_released(self, ev, signal):
         if self.menu_active:
             x = ev.position.x
@@ -85,3 +91,7 @@ class MenuSystem(System):
 
                 if dy < 0.25 and dx < 1.5:
                     callback()
+    
+    def on_key_released(self, ev, signal):
+        if ev.key == Escape:
+            signal(ToggleMenu())

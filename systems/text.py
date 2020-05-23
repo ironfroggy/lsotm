@@ -66,6 +66,17 @@ class Text:
     def setup(self):
         self.text = self._text
     
+    def _get_alignment_offset(self):
+        if self.align == 'center':
+            align = -0.5 * len(self.text) * KERNING * self.size
+        elif self.align == 'left':
+            raise NotImplementedError()
+        elif self.align == 'right':
+            align = 0
+        else:
+            raise ValueError()
+        return align
+    
     @property
     def text(self):
         return self._text
@@ -77,8 +88,13 @@ class Text:
     @size.setter
     def size(self, value):
         self._size = value
-        for l in self.letters:
+        p = self.position
+        align = self._get_alignment_offset()
+        for i, l in enumerate(self.letters):
             l.size = value
+            x = p.x + i * KERNING * value + align
+            y = p.y
+            l.position = ppb.Vector(x, y)
     
     @property
     def color(self):
@@ -119,15 +135,7 @@ class Text:
         self.letters.clear()
         
         p = self.position
-
-        if self.align == 'center':
-            align = -0.5 * len(self.text) * KERNING * self.size
-        elif self.align == 'left':
-            raise NotImplementedError()
-        elif self.align == 'right':
-            align = 0
-        else:
-            raise ValueError()
+        align = self._get_alignment_offset()
 
         for i, c in enumerate(self.text):
             l = Letter(c, self._color)
