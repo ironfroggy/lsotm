@@ -236,13 +236,22 @@ class Viking(ppb.Sprite):
         self.state.on_mushroom_attack(self, ev, signal)
 
 
-class VikingSpawn(ppb.systemslib.System):
+class VikingSpawnCtrl:
+    active: bool = False
+
+    @classmethod
+    def create(cls, scene):
+        ctrl = cls()
+        ctrl.active = True
+        scene.add(ctrl)
+        return ctrl
 
     def on_update(self, ev, signal):
-        vikings = list(ev.scene.get(tag='viking'))
-        if not vikings:
-            for i in range(randint(1, 5)):
-                ev.scene.add(Viking(
-                    layer=10,
-                    position=ppb.Vector(0, randint(5, 10)).rotate(randint(0, 360)),
-                ), tags=['viking'])
+        if self.active:
+            vikings = list(ev.scene.get(tag='viking'))
+            if not vikings:
+                for i in range(randint(1, 5)):
+                    ev.scene.add(Viking(
+                        layer=10,
+                        position=ppb.Vector(0, randint(5, 10)).rotate(randint(0, 360)),
+                    ), tags=['viking'])

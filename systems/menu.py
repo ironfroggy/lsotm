@@ -13,7 +13,10 @@ V = ppb.Vector
 
 MENU_LAYER = 1000
 
+
+# TODO: Rename to DialogSystem, I think
 class MenuSystem(System):
+    active: bool = False
     menu_active = True
 
     def on_start_game(self, ev, signal):

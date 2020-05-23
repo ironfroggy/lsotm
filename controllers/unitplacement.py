@@ -20,7 +20,7 @@ class MushroomPlacementMarker(ppb.Sprite):
     color = COLOR['WHITE']
 
 
-class MushroomPlacement(ppb.systemslib.System):
+class UnitPlacementCtrl:
     """The Mushroom Placement System is responsible for:
     - Invoking the UI elements for selecting new units to place
     - Allowing the user to place new units
@@ -41,6 +41,29 @@ class MushroomPlacement(ppb.systemslib.System):
     - MeterUpdate
     """
 
+    active: bool = True
+
+    @classmethod
+    def create(cls, scene, signal):
+        ctrl = cls()
+
+        ctrl.scene = scene
+        ctrl.mode = "waiting"
+        ctrl.marker = MushroomPlacementMarker()
+        scene.add(ctrl.marker)
+        
+        signal(ui.CreateButton("Smooshroom", enabled=False))
+        signal(ui.DisableButton("Smooshroom"))
+
+        signal(ui.CreateButton("Poddacim", enabled=False))
+        signal(ui.DisableButton("Poddacim"))
+
+        # TODO: Move to scene?
+        ctrl.create_mushroom(Smooshroom, ppb.Vector(0, 0), signal)
+
+        scene.add(ctrl)
+        return ctrl
+
     # TODO: Create mushrooms through events
     def create_mushroom(self, cls, position, signal):
         # TODO: create different kinds
@@ -50,20 +73,6 @@ class MushroomPlacement(ppb.systemslib.System):
         CtrlMeter.create(self.scene, FRAMES_HEALTH, target=mushroom, attr='health', track=mushroom)
         CtrlMeter.create(self.scene, FRAMES_TOXINS, target=mushroom, attr='toxins', track=mushroom)
         signal(MeterUpdate(mushroom, 'health', 1.0))
-
-    def on_scene_started(self, ev, signal):
-        self.scene = ev.scene
-        self.mode = "waiting"
-        self.marker = MushroomPlacementMarker()
-        ev.scene.add(self.marker)
-        
-        signal(ui.CreateButton("Smooshroom", enabled=False))
-        signal(ui.DisableButton("Smooshroom"))
-
-        signal(ui.CreateButton("Poddacim", enabled=False))
-        signal(ui.DisableButton("Poddacim"))
-
-        self.create_mushroom(Smooshroom, ppb.Vector(0, 0), signal)
     
     def on_score_updated(self, ev, signal):
         if ev.points >= 3:

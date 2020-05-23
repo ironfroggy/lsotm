@@ -23,39 +23,29 @@ from systems.renderer import CustomRenderer
 from systems.text import Text
 from systems.menu import MenuSystem
 from systems.particles import ParticleSystem
-from systems.scoring import ScoreBoard
-from systems.tilemap import TilemapSystem
-from systems.unitplacement import MushroomPlacement
 from systems import ui
 
 from cloud import CloudSystem
 
-from viking import Viking, VikingSpawn
+from viking import Viking
 
 from constants import COLOR
 from events import *
 
 
-def setup(scene):
-    def zoom():
-        scene.main_camera.width = 20.1
-    delay(1, zoom)
+from scenes.game import GameScene  
 
 
 ppb.run(
-    setup=setup,
+    starting_scene=GameScene,
     basic_systems=(CustomRenderer, Updater, EventPoller, SoundController, AssetLoadingSystem),
     systems=[
         MenuSystem,
         Tweening,
         Timers,
         ParticleSystem,
-        ScoreBoard,
         CloudSystem,
-        VikingSpawn,
         ui.UISystem,
-        MushroomPlacement,
-        TilemapSystem,
         FloatingNumberSystem,
     ],
     resolution=(1280, 720),
