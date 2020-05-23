@@ -104,7 +104,7 @@ class AttackState(State):
         else:
             d = dist(self.position, self.target.position)
             if d <= 1.5:
-                signal(VikingAttack(self.target, 1))
+                signal(VikingAttack(self.target, self.atk))
                 self.sprite_base.image = Animation("resources/viking/attack_{0..4}.png", 10)
                 self.set_state("cooldown")
             else:
@@ -177,8 +177,10 @@ def state_method(name):
 
 class Viking(ppb.Sprite):
     size: float = 0.0
-    speed: float = 0.5
-    hp: int = 3
+    speed: float = 1.0
+    hp: int = 1
+    atk: int = 1
+    strength: int = 1
     last_hit: float = 0.0
     last_hit_by: int = 0
     target: ppb.Sprite = None
@@ -191,6 +193,9 @@ class Viking(ppb.Sprite):
     last_state_change: float = 0.0
 
     def __init__(self, *args, **kwargs):
+        self.strength = kwargs.pop('strength')
+        self.hp = max(1, self.strength // 2)
+        self.atk = max(1, self.strength - self.hp)
         super().__init__(*args, **kwargs)
         self.state = ApproachState
 
@@ -205,18 +210,24 @@ class Viking(ppb.Sprite):
 
     def on_pre_render(self, ev, signal):
         layer = pos_to_layer(self.position)
+
         if self.sprite_base is None:
             self.sprite_base = ppb.Sprite(
                 image=VIKING_WALK,
                 layer=layer,
                 size=2,
             )
-            self.sprite_clothes = ppb.Sprite(image=choice(VIKING_CLOTHES), layer=layer + 0.1, size=2)
-            self.sprite_hat = ppb.Sprite(image=choice(VIKING_HAT), layer=layer + 0.1, size=2)
+
+            clothes_i = min(len(VIKING_CLOTHES), max(1, self.strength // 2)) - 1
+            hat_i = min(len(VIKING_HAT), max(1, self.strength - clothes_i)) - 1
+            print(self.strength, clothes_i, hat_i)
+            self.sprite_clothes = ppb.Sprite(image=VIKING_CLOTHES[clothes_i], layer=layer + 0.1, size=2)
+            self.sprite_hat = ppb.Sprite(image=VIKING_HAT[hat_i], layer=layer + 0.1, size=2)
 
             ev.scene.add(self.sprite_base)
             ev.scene.add(self.sprite_clothes)
             ev.scene.add(self.sprite_hat)
+
         self.sprite_base.position = self.position
         self.sprite_base.layer = layer
         self.sprite_hat.position = self.position
@@ -238,6 +249,7 @@ class Viking(ppb.Sprite):
 
 class VikingSpawnCtrl:
     active: bool = False
+    wave_number: int = 1
 
     @classmethod
     def create(cls, scene):
@@ -252,8 +264,18 @@ class VikingSpawnCtrl:
         if self.active:
             vikings = list(ev.scene.get(tag='viking'))
             if not vikings:
-                for i in range(randint(1, 5)):
+                danger = self.wave_number
+                strengths = []
+                while danger:
+                    strength = randint(1, danger)
+                    strengths.append(strength)
+                    danger -= strength
+                    
+                for i, strength in enumerate(strengths):
                     ev.scene.add(Viking(
                         layer=10,
-                        position=ppb.Vector(0, randint(5, 10)).rotate(randint(0, 360)),
+                        position=ppb.Vector(-10 + i, 0),
+                        strength=strength,
                     ), tags=['viking'])
+            
+                self.wave_number += 1

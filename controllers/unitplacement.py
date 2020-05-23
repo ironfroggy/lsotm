@@ -59,7 +59,7 @@ class UnitPlacementCtrl:
         signal(ui.DisableButton("Poddacim"))
 
         # TODO: Move to scene?
-        ctrl.create_mushroom(Smooshroom, ppb.Vector(0, 0), signal)
+        ctrl.create_mushroom(Poddacim, ppb.Vector(0, 0), signal)
 
         scene.add(ctrl)
         return ctrl
