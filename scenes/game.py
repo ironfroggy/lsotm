@@ -5,11 +5,13 @@ from controllers.tilemap import TilemapCtrl
 from controllers.scoring import ScoreCtrl
 from viking import VikingSpawnCtrl
 
+from constants import COLOR
 from scenes.paused import PausedScene
 from systems.timer import delay
 
 
 class GameScene(ppb.BaseScene):
+    background_color = COLOR['BLACK']
 
     def on_scene_started(self, ev, signal):
         self.setup_scene(ev.scene, signal)
