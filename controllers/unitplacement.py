@@ -17,7 +17,7 @@ class MushroomPlacementMarker(ppb.Sprite):
     image: ppb.Image = ppb.Image("resources/mushroom/mushroom_0.png")
     size: float = 0.0
     layer: float = 200
-    color = COLOR['WHITE']
+    tint = COLOR['WHITE']
 
 
 class UnitPlacementCtrl:
@@ -110,7 +110,7 @@ class UnitPlacementCtrl:
                 closest = min(closest, d)
             if closest >= 1.5:
                 self.can_place = True
-                self.marker.color = COLOR['GREEN']
+                self.marker.tint = (0, 255, 0, 128) # COLOR['GREEN']
             else:
                 self.can_place = False
-                self.marker.color = COLOR['RED']
+                self.marker.tint = COLOR['RED']

@@ -94,11 +94,11 @@ class Smooshroom(Mushroom):
 
     def on_viking_attack(self, ev, signal):
         super().on_viking_attack(ev, signal)
+        if ev.target is self:
+            self.smooshed = True
 
-        self.smooshed = True
+            self.cloud_radius = 0.5
+            self.cloud_id = int(perf_counter() * 1000)
+            tweening.tween(self, "cloud_radius", C.SMOOSHROOM_CLOUD_RADIUS_MAX, C.SMOOSHROOM_CLOUD_RADIUS_TIME, easing='quad_out')
 
-        self.cloud_radius = 0.5
-        self.cloud_id = int(perf_counter() * 1000)
-        tweening.tween(self, "cloud_radius", C.SMOOSHROOM_CLOUD_RADIUS_MAX, C.SMOOSHROOM_CLOUD_RADIUS_TIME, easing='quad_out')
-
-        delay(0.25, lambda: setattr(self, 'smooshed', False))
+            delay(0.25, lambda: setattr(self, 'smooshed', False))

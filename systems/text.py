@@ -36,7 +36,7 @@ class Letter(ppb.Sprite):
     def __init__(self, char, color):
         super().__init__()
         self.char = char
-        self.color = color
+        self.tint = color
         for y, row in enumerate(LEGEND.split('\n')):
             for x, col in enumerate(row):
                 if char in col:

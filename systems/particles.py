@@ -11,12 +11,12 @@ class Particle(ppb.sprites.Sprite):
     image = ppb.Image("resources/sparkle1.png")
     opacity = 128
     opacity_mode = 'add'
-    color = COLOR['WHITE']
+    tint = COLOR['WHITE']
     size = 2
     rotation = 0
 
     def __init__(self, *args, **kwargs):
-        self.color = kwargs.pop('color', COLOR['WHITE'])
+        self.tint = kwargs.pop('color', COLOR['WHITE'])
         super().__init__(*args, **kwargs)
 
 
@@ -49,7 +49,7 @@ class ParticleSystem(ppb.systemslib.System):
         else:
             s.opacity_mode = 'add'
             s.opacity = 128
-        s.color = color
+        s.tint = color
         s.position = pos
         s.rotation = randint(0, 260)
         s.size = 1.5

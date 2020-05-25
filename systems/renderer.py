@@ -22,51 +22,8 @@ from ppb.systems import Renderer
 
 
 class CustomRenderer(Renderer):
-    last_opacity = 255
-    last_opacity_mode = 'blend'
-    last_color = (255, 255, 255)
-
-    def prepare_resource(self, game_object):
-        texture = super().prepare_resource(game_object)
-        if texture:
-            opacity = getattr(game_object, 'opacity', 255)
-            opacity_mode = getattr(game_object, 'opacity_mode', 'blend')
-            color = getattr(game_object, 'color', (255, 255, 255))
-
-            if True: # opacity != self.last_opacity:
-                sdl_call(
-                    SDL_SetTextureAlphaMod, texture.inner, opacity,
-                    _check_error=lambda rv: rv < 0
-                )
-                self.last_opacity = opacity
-            
-            if True: #opacity_mode != self.last_opacity_mode:
-                self.last_opacity_mode = opacity_mode
-                if opacity_mode == 'add':
-                    sdl_call(
-                        SDL_SetTextureBlendMode, texture.inner, SDL_BLENDMODE_ADD,
-                        _check_error=lambda rv: rv < 0
-                    )
-                elif opacity_mode == 'blend':
-                    sdl_call(
-                        SDL_SetTextureBlendMode, texture.inner, SDL_BLENDMODE_BLEND,
-                        _check_error=lambda rv: rv < 0
-                    )
-                else:
-                    raise ValueError(f"Support modes for translucent sprites are 'add' or 'blend', not '{opacity_mode}'.")
-            
-            if True: # color != self.last_color:
-                sdl_call(
-                    SDL_SetTextureColorMod, texture.inner, color[0], color[1], color[2],
-                    _check_error=lambda rv: rv < 0
-                )
-                self.last_color = color
-
-            return texture
     
     def compute_rectangles(self, texture, game_object, camera):
-        rect = getattr(game_object, 'rect', None)
-
         flags = sdl2.stdinc.Uint32()
         access = ctypes.c_int()
         img_w = ctypes.c_int()
@@ -77,6 +34,7 @@ class CustomRenderer(Renderer):
             _check_error=lambda rv: rv < 0
         )
 
+        rect = getattr(game_object, 'rect', None)
         if rect:
             src_rect = SDL_Rect(*rect)
             win_w = rect[2] * game_object.size

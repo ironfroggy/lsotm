@@ -9,7 +9,7 @@ class TilemapInitialization:
 
 class TilemapCtrl:
     active: bool = False
-    width: int = 25
+    width: int = 26
     height: int = 16
 
     @classmethod

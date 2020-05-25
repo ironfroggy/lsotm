@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 import math
 from random import choice, random, randint
-from time import time
+from time import time, perf_counter
 import types
 from typing import Tuple
 
@@ -36,6 +36,15 @@ from scenes.game import GameScene
 from scenes.title import TitleScene
 
 
+class DiagnosticSystem(ppb.systemslib.System):
+    last_frame = perf_counter()
+
+    def on_pre_render(self, ev, signal):
+        obj_count = len(list(ev.scene))
+        cur_frame = perf_counter()
+        self.last_frame = cur_frame
+
+
 ppb.run(
     starting_scene=TitleScene,
     basic_systems=(CustomRenderer, Updater, EventPoller, SoundController, AssetLoadingSystem),
@@ -46,8 +55,9 @@ ppb.run(
         CloudSystem,
         ui.UISystem,
         FloatingNumberSystem,
+        DiagnosticSystem,
     ],
     resolution=(1280, 720),
     window_title='🍄Last Stand of the Mushrooms🍄',
-    target_frame_rate=60,
+    target_frame_rate=999,
 )
