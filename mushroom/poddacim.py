@@ -35,6 +35,7 @@ class Poddacim(Mushroom):
     
     last_shot: float = 0.0
     smooshed: bool = False
+    exhausted: bool = False
 
     def on_button_pressed(self, ev: ButtonPressed, signal):
         clicked = super().on_button_pressed(ev, signal)
@@ -47,7 +48,8 @@ class Poddacim(Mushroom):
     def on_update(self, ev: Update, signal):
         t = perf_counter()
         r = 0.25 if self.smooshed else 1.0
-        if self.last_shot + r <= t and self.toxins > C.PODDACIM_POD_RATE:
+
+        if not self.exhausted and self.last_shot + r <= t and self.toxins > C.PODDACIM_POD_RATE:
             self.last_shot = t
             vikings = [v for v in ev.scene.get(tag='viking') if v.hp > 0]
             vikings.sort(key=lambda viking: (viking.position - self.position).length)
@@ -57,8 +59,12 @@ class Poddacim(Mushroom):
                     pod = PoddacimPod(position=self.position)
                     tweening.tween(pod, 'position', vikings[0].position, 0.25)
                     ev.scene.add(pod)
-                    self.toxins = max(0.0, self.toxins - C.PODDACIM_POD_RATE)
+                    self.toxins = max(0.0, round(self.toxins - C.PODDACIM_POD_RATE, 2))
                     signal(MeterUpdate(self, 'toxins', self.toxins))
+
+                    # When toxins hit 0, Poddacim becomes exhausted
+                    if self.toxins == 0.0:
+                        self.exhausted = True
 
                     def _():
                         vikings[0].on_mushroom_attack(MushroomAttack(None, vikings[0], C.PODDACIM_POD_DMG), signal)
@@ -67,6 +73,10 @@ class Poddacim(Mushroom):
 
         # If the mushroom isn't being smooshed, increase toxin accumulator
         # and reset the cloud accumulator.
-        if not self.smooshed:
+        if not self.smooshed or self.exhausted:
             self.toxins = min(1.0, self.toxins + ev.time_delta * C.PODDACIM_TOXIN_CHARGE)
             signal(MeterUpdate(self, 'toxins', self.toxins))
+
+            # When toxins are full, no longer exhausted
+            if self.toxins == 1.0:
+                self.exhausted = False
