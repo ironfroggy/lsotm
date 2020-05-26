@@ -53,7 +53,7 @@ class Poddacim(Mushroom):
             vikings.sort(key=lambda viking: (viking.position - self.position).length)
             if vikings:
                 dist = (vikings[0].position - self.position).length
-                if dist < 4.0:
+                if dist < C.PODDACIM_ATK_RADIUS:
                     pod = PoddacimPod(position=self.position)
                     tweening.tween(pod, 'position', vikings[0].position, 0.25)
                     ev.scene.add(pod)
