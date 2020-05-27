@@ -18,6 +18,7 @@ class MushroomAttack:
     cloud_id: int
     target: 'viking.Viking'
     dmg: int = 1
+    scene: ppb.BaseScene = None
 
 
 class Cloud(ppb.sprites.Sprite):

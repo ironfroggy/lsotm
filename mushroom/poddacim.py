@@ -67,7 +67,7 @@ class Poddacim(Mushroom):
                         self.exhausted = True
 
                     def _():
-                        vikings[0].on_mushroom_attack(MushroomAttack(None, vikings[0], C.PODDACIM_POD_DMG), signal)
+                        vikings[0].on_mushroom_attack(MushroomAttack(None, vikings[0], C.PODDACIM_POD_DMG, scene=ev.scene), signal)
                         ev.scene.remove(pod)
                     delay(0.25, _)
 

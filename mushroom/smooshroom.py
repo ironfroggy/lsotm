@@ -83,7 +83,7 @@ class Smooshroom(Mushroom):
                 for viking in ev.scene.get(tag='viking'):
                     d = (viking.position - self.position).length
                     if d <= self.cloud_radius + 0.5:
-                        viking.on_mushroom_attack(MushroomAttack(perf_counter(), viking), signal)
+                        viking.on_mushroom_attack(MushroomAttack(perf_counter(), viking, scene=ev.scene), signal)
 
         # If the mushroom isn't being smooshed, increase toxin accumulator
         # and reset the cloud accumulator.
