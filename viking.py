@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import math
-from random import choice, randint
+from random import choice, randint, random
 import time
 import typing
 
@@ -15,6 +15,9 @@ from events import ScorePoints
 from systems.floatingnumbers import CreateFloatingNumber
 from utils.statemachine import StateMachine
 from utils.spritedepth import pos_to_layer
+
+from systems.particles import ParticleSystem
+from systems.timer import repeat, cancel
 
 # from vikings.corpse import CorpseCtrl
 
@@ -146,6 +149,16 @@ class DieingState(State):
         tweening.tween(self, 'position', s.position + ppb.Vector(-0.5, -0.25), 0.5)
         self.sprite_fg.opacity = 255
 
+        self.particle_timer = repeat(0.025, lambda: DieingState.spore_particle(self))
+    
+    @staticmethod
+    def spore_particle(self):
+        origin = self.position + ppb.Vector(-0.5 + random(), 0)
+        heading = self.position + ppb.Vector(-0.5 + random(), 1.0 + random())
+        ParticleSystem.spawn(origin, COLOR['YELLOW'], heading,
+            opacity=255, opacity_mode=ppb.flags.BlendModeBlend,
+        )
+
     @staticmethod
     def on_update(self, ev, signal):
         if self.state_time() >= 5.0:
@@ -155,7 +168,10 @@ class DieingState(State):
             ev.scene.remove(self.sprite_hat)
 
             signal(ScorePoints(1))
-            signal(CreateFloatingNumber(1, self.position, COLOR['YELLOW']))
+            signal(CreateFloatingNumber(1, self.position + ppb.Vector(0, 1), COLOR['YELLOW']))
+        
+        if self.state_time() >= 4.5:
+            cancel(self.particle_timer)
     
     @staticmethod
     def on_mushroom_attack(self, ev, signal):
