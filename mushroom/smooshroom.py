@@ -87,7 +87,7 @@ class Smooshroom(Mushroom):
 
         # If the mushroom isn't being smooshed, increase toxin accumulator
         # and reset the cloud accumulator.
-        elif not self.smooshed:
+        elif not self.smooshed and self.toxins < 1.0:
             self.toxins = min(1.0, self.toxins + ev.time_delta * C.SMOOSHROOM_TOXIN_CHARGE)
             self.cloud = 0.0
             signal(MeterUpdate(self, 'toxins', self.toxins))

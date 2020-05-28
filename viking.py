@@ -280,7 +280,7 @@ class Viking(ppb.Sprite):
 
 class VikingSpawnCtrl:
     active: bool = False
-    wave_number: int = 1
+    wave_number: int = 10
 
     @classmethod
     def create(cls, scene):

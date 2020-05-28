@@ -1,4 +1,9 @@
 import ppb
+from ppb import flags
+
+from sdl2 import (
+    SDL_FLIP_VERTICAL,
+)
 
 from constants import COLOR
 from controllers.meters import CtrlMeter
@@ -9,7 +14,7 @@ from events import ScorePoints, ScoreUpdated
 
 from mushroom import Smooshroom, Poddacim
 
-FRAMES_HEALTH = Sequence("resources/meter/l3_meter_{1..13}.png")
+FRAMES_HEALTH = Sequence("resources/meter/semimeter{1..25}.png")
 FRAMES_TOXINS = Sequence("resources/meter/l4_meter_{1..13}.png")
 
 
@@ -70,8 +75,8 @@ class UnitPlacementCtrl:
         mushroom = cls(position=position, layer=10)
         self.scene.add(mushroom, tags=['mushroom'])
         # TODO: Create meters through events
-        CtrlMeter.create(self.scene, FRAMES_HEALTH, target=mushroom, attr='health', track=mushroom)
-        CtrlMeter.create(self.scene, FRAMES_TOXINS, target=mushroom, attr='toxins', track=mushroom)
+        CtrlMeter.create(self.scene, FRAMES_HEALTH, target=mushroom, attr='health', track=mushroom, color=COLOR['RED'])
+        CtrlMeter.create(self.scene, FRAMES_HEALTH, target=mushroom, attr='toxins', track=mushroom, color=COLOR['DARKGREEN'], flip=SDL_FLIP_VERTICAL)
         signal(MeterUpdate(mushroom, 'health', 1.0))
     
     def on_score_updated(self, ev, signal):

@@ -16,6 +16,9 @@ class Timer:
 
     def __hash__(self):
         return hash(id(self))
+    
+    def cancel(self):
+        self.clear = True
 
 @dataclass
 class Clock:

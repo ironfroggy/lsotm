@@ -7,6 +7,11 @@ from time import monotonic
 from sdl2 import (
     SDL_BLENDMODE_ADD,
     SDL_BLENDMODE_BLEND,
+    SDL_FLIP_NONE,
+    SDL_FLIP_HORIZONTAL,
+    SDL_FLIP_VERTICAL,
+    SDL_RenderCopyEx,
+    SDL_RenderPresent,
     SDL_SetTextureAlphaMod,
     SDL_SetTextureBlendMode,
     SDL_SetTextureColorMod,
@@ -22,6 +27,27 @@ from ppb.systems import Renderer
 
 
 class CustomRenderer(Renderer):
+
+    def on_render(self, render_event, signal):
+        camera = render_event.scene.main_camera
+
+        self.render_background(render_event.scene)
+
+        for game_object in render_event.scene.sprite_layers():
+            texture = self.prepare_resource(game_object)
+            if texture is None:
+                continue
+            src_rect, dest_rect, angle = self.compute_rectangles(
+                texture.inner, game_object, camera
+            )
+            flip = getattr(game_object, 'flip', SDL_FLIP_NONE)
+            sdl_call(
+                SDL_RenderCopyEx, self.renderer, texture.inner,
+                ctypes.byref(src_rect), ctypes.byref(dest_rect),
+                angle, None, flip,
+                _check_error=lambda rv: rv < 0
+            )
+        sdl_call(SDL_RenderPresent, self.renderer)
     
     def compute_rectangles(self, texture, game_object, camera):
         flags = sdl2.stdinc.Uint32()

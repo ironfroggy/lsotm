@@ -73,10 +73,9 @@ class Poddacim(Mushroom):
 
         # If the mushroom isn't being smooshed, increase toxin accumulator
         # and reset the cloud accumulator.
-        if not self.smooshed or self.exhausted:
+        if self.toxins < 1.0 and not self.smooshed or self.exhausted:
             self.toxins = min(1.0, self.toxins + ev.time_delta * C.PODDACIM_TOXIN_CHARGE)
-            signal(MeterUpdate(self, 'toxins', self.toxins))
-
             # When toxins are full, no longer exhausted
             if self.toxins == 1.0:
                 self.exhausted = False
+            signal(MeterUpdate(self, 'toxins', self.toxins, flash=self.exhausted))
