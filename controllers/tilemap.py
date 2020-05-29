@@ -6,28 +6,43 @@ import ppb
 class TilemapInitialization:
     pass
 
+TILE_IMAGES = [
+    ppb.Image(f"resources/ground/ground_{r}.png")
+    for r in range(6)
+]
+
 
 class TilemapCtrl:
     active: bool = False
     width: int = 26
     height: int = 16
+    layer: int = -1
 
     @classmethod
-    def create(cls, scene):
-        tc = TilemapCtrl()
-
-        for y in range(-cls.height//2, -cls.height//2 + cls.height):
-            for x in range(-cls.width//2, -cls.width//2 + cls.width):
-                r = random.randint(0, 5)
+    def create(cls, scene, **kwargs):
+        tc = TilemapCtrl(**kwargs)
+        scene.add(tc)
+        tc.setup(scene)
+        return tc
+    
+    def __init__(self, width=26, height=16, layer=-1, images=TILE_IMAGES):
+        self.layer = layer
+        self.width = width
+        self.height = height
+        self.images = images
+        self.tiles = []
+    
+    def setup(self, scene):
+        for y in range(-self.height//2, -self.height//2 + self.height):
+            for x in range(-self.width//2, -self.width//2 + self.width):
                 t = ppb.Sprite(
-                    image=ppb.Image(f"resources/ground/ground_{r}.png"),
+                    image=random.choice(self.images),
                     position=ppb.Vector(x, y),
-                    layer=-1,
+                    layer=self.layer,
                     size=1.01
                 )
+                self.tiles.append(t)
                 scene.add(t)
-
-        return tc
     
     def on_key_released(self, ev, signal):
         if self.active:

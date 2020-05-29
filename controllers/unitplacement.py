@@ -10,6 +10,7 @@ from controllers.meters import CtrlMeter
 from systems import ui
 from utils.imagesequence import Sequence 
 from controllers.meters import MeterUpdate, MeterRemove
+from controllers.tilemap import TilemapCtrl
 from events import ScorePoints, ScoreUpdated
 
 from mushroom import Smooshroom, Poddacim
@@ -52,6 +53,9 @@ class UnitPlacementCtrl:
     def create(cls, scene, signal):
         ctrl = cls()
 
+        # images = [ppb.Image("resources/root_0.png")]
+        # ctrl.tilemap = TilemapCtrl.create(scene, layer=0, images=images)
+
         ctrl.scene = scene
         ctrl.mode = "waiting"
         ctrl.marker = MushroomPlacementMarker()
@@ -65,8 +69,8 @@ class UnitPlacementCtrl:
 
         # TODO: Move to scene?
         ctrl.create_mushroom(Smooshroom, ppb.Vector(0, 0), signal)
-
         scene.add(ctrl)
+
         return ctrl
 
     # TODO: Create mushrooms through events
@@ -78,6 +82,15 @@ class UnitPlacementCtrl:
         CtrlMeter.create(self.scene, FRAMES_HEALTH, target=mushroom, attr='health', track=mushroom, color=COLOR['RED'])
         CtrlMeter.create(self.scene, FRAMES_HEALTH, target=mushroom, attr='toxins', track=mushroom, color=COLOR['DARKGREEN'], flip=SDL_FLIP_VERTICAL)
         signal(MeterUpdate(mushroom, 'health', 1.0))
+
+        mushroom.root = ppb.Sprite(
+            image=ppb.Image("resources/root_1.png"),
+            position=position - ppb.Vector(0, 0.5),
+            size=6,
+            layer=9,
+            opacity=0,
+        )
+        self.scene.add(mushroom.root)        
     
     def on_score_updated(self, ev, signal):
         if ev.points >= 3:

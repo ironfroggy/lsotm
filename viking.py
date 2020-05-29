@@ -7,6 +7,7 @@ import typing
 import ppb
 from ppb.events import ButtonPressed, ButtonReleased, Update
 from ppb.features.animation import Animation
+from ppb.utils import get_time
 
 import ppb_tween as tweening
 
@@ -149,7 +150,13 @@ class DieingState(State):
         tweening.tween(self, 'position', s.position + ppb.Vector(-0.5, -0.25), 0.5)
         self.sprite_fg.opacity = 255
 
-        self.particle_timer = repeat(0.025, lambda: DieingState.spore_particle(self))
+        for mushroom in scene.get(tag='mushroom'):
+            d = (mushroom.position - self.position).length
+            if d < 3:
+                self.nearest_mushroom = mushroom
+                self.particle_timer = repeat(0.025, lambda: DieingState.spore_particle(self))
+                mushroom.absorbing = get_time() + 5.0
+                break
     
     @staticmethod
     def spore_particle(self):
@@ -167,10 +174,11 @@ class DieingState(State):
             ev.scene.remove(self.sprite_clothes)
             ev.scene.remove(self.sprite_hat)
 
-            signal(ScorePoints(1))
-            signal(CreateFloatingNumber(1, self.position + ppb.Vector(0, 1), COLOR['YELLOW']))
+            if self.nearest_mushroom:
+                signal(ScorePoints(1))
+                signal(CreateFloatingNumber(1, self.position + ppb.Vector(0, 1), COLOR['YELLOW']))
         
-        if self.state_time() >= 4.5:
+        if self.state_time() >= 4.5 and self.particle_timer:
             cancel(self.particle_timer)
     
     @staticmethod
@@ -203,6 +211,7 @@ class Viking(ppb.Sprite):
     last_hit: float = 0.0
     last_hit_by: int = 0
     target: ppb.Sprite = None
+    nearest_mushroom: 'mushrooms.Mushroom' = None
 
     sprite_base: ppb.Sprite = None
     sprite_hat: ppb.Sprite = None
@@ -210,6 +219,7 @@ class Viking(ppb.Sprite):
 
     state: typing.Type[State] = None
     last_state_change: float = 0.0
+    particle_timer: 'systems.timer.Timer' = None
 
     def __init__(self, *args, **kwargs):
         self.strength = kwargs.pop('strength')
@@ -280,7 +290,7 @@ class Viking(ppb.Sprite):
 
 class VikingSpawnCtrl:
     active: bool = False
-    wave_number: int = 10
+    wave_number: int = 5
 
     @classmethod
     def create(cls, scene):
@@ -296,11 +306,14 @@ class VikingSpawnCtrl:
             vikings = list(ev.scene.get(tag='viking'))
             if not vikings:
                 danger = self.wave_number
-                strengths = []
-                while danger:
-                    strength = randint(1, danger)
-                    strengths.append(strength)
-                    danger -= strength
+                if danger % 10 == 0:
+                    strengths = [danger]
+                else:
+                    strengths = []
+                    while danger:
+                        strength = randint(1, danger)
+                        strengths.append(strength)
+                        danger -= strength
                     
                 for i, strength in enumerate(strengths):
                     ev.scene.add(Viking(
