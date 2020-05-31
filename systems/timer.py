@@ -13,6 +13,7 @@ class Timer:
     callback: FunctionType
     repeating: float = 0
     clear: bool = False
+    until: float = None
 
     def __hash__(self):
         return hash(id(self))
@@ -46,8 +47,9 @@ class Timers(System):
         return t
     
     @classmethod
-    def repeat(cls, seconds, func):
-        t = Timer(perf_counter() + seconds, func, repeating=seconds)
+    def repeat(cls, seconds, func, until=None):
+        n = perf_counter()
+        t = Timer(n + seconds, func, repeating=seconds, until=n + until)
         cls.timers.add(t)
         return t
     
@@ -64,11 +66,13 @@ class Timers(System):
             else:
                 now = perf_counter()
                 if now >= t.end_time:
-                    t.callback()
+                    if t.until is None or t.until > now:
+                        t.callback()
                     if t.repeating > 0:
-                        t.end_time += t.repeating
-                    else:
-                        clear.append(t)
+                        if t.until is None or t.until > now:
+                            t.end_time += t.repeating
+                            continue
+                    clear.append(t)
         for t in clear:
             cls.timers.remove(t)
 

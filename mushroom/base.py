@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from math import sin
+from math import cos, pi
 from time import perf_counter
 
 import ppb
@@ -8,9 +8,15 @@ from ppb.events import ButtonPressed, ButtonReleased, Update
 
 from controllers.meters import MeterUpdate, MeterRemove
 from systems.floatingnumbers import CreateFloatingNumber
+from systems.particles import ParticleSpawnerCreate
+from systems.timer import repeat
 from systems import ui
 
 from utils.spritedepth import pos_to_layer
+
+from ppb_tween import tween
+
+from constants import *
 
 
 @dataclass
@@ -24,6 +30,7 @@ class Mushroom(ppb.sprites.Sprite):
     health: int = 10
 
     absorbing: float = 0.0
+    absorb_radius: float = 3.0
 
     # TODO: Can any of these be combined?
     smooshed: bool = False
@@ -32,11 +39,14 @@ class Mushroom(ppb.sprites.Sprite):
     emit_t: float = 0.0
     toxins: float = 1.0
 
+    # PPB Events
     def on_pre_render(self, ev, signal):
         self.layer = pos_to_layer(self.position)
         t = get_time()
         if self.absorbing > t:
-            self.root.opacity = 64 + int(64 * (sin(t) + 1.0) * 0.5)
+            s = (cos((self.absorbing - t + 1.0) * pi) + 1.0) * 0.5
+            o = round(64 * s)
+            self.root.opacity = o
         elif self.root.opacity > 0:
             self.root.opacity -= 1
 
@@ -53,6 +63,7 @@ class Mushroom(ppb.sprites.Sprite):
         # TODO: Animate the bounce back
         self.image = self.smoosh_sprites[0]
 
+    # Gameplay events
     def on_viking_attack(self, ev, signal):
         if ev.target is self:
             self.health = max(0, self.health - ev.dmg)
@@ -62,3 +73,15 @@ class Mushroom(ppb.sprites.Sprite):
                 ev.scene.remove(self)
                 ev.scene.remove(self.root)
                 signal(MeterRemove(self))
+    
+    def on_viking_death(self, ev, signal):
+        v = ev.viking.position
+        d = (self.position - v).length
+        if d < self.absorb_radius:
+            self.absorbing = get_time() + 5.0
+            signal(ParticleSpawnerCreate(
+                source=(v + ppb.Vector(-1, -0.4), v),
+                dest=(v + ppb.Vector(-0.9, 1.25), v + ppb.Vector(-0.1, 1)),
+                color=COLOR['YELLOW'],
+                lifespan=5.0,
+            ))

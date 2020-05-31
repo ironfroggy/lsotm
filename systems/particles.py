@@ -1,11 +1,25 @@
-from random import random, randint
+from dataclasses import dataclass
+from random import random, randint, uniform
+import typing
 
 import ppb
 
 from ppb_tween import Tweener
 
 from constants import COLOR
-from systems.timer import delay
+from systems.timer import delay, repeat
+
+
+# TODO: what is the advantage of an event over a simple exported function?
+@dataclass
+class ParticleSpawnerCreate:
+    source: typing.Tuple[ppb.Vector, ppb.Vector]
+    dest: typing.Tuple[ppb.Vector, ppb.Vector]
+    color: ppb.utils.Color
+    lifespan: float
+    frequency: float = 0.025
+    opacity: int = 255
+    opacity_mode: ppb.flags.BlendMode = ppb.flags.BlendModeBlend
 
 
 class Particle(ppb.sprites.Sprite):
@@ -61,3 +75,22 @@ class ParticleSystem(ppb.systemslib.System):
         cls.t.tween(s, 'size', sizing[1], 0.5, easing='linear')
         if heading:
             cls.t.tween(s, 'position', heading, 0.5, easing='linear')
+
+    def on_particle_spawner_create(self, ev: ParticleSpawnerCreate, signal):
+        source_bl, source_tr = ev.source
+        dest_bl, dest_tr = ev.dest
+
+        def spawn_one():
+            source_x = uniform(source_bl.x, source_tr.x)
+            source_y = uniform(source_bl.y, source_tr.y)
+            dest_x = uniform(dest_bl.x, dest_tr.x)
+            dest_y = uniform(dest_bl.y, dest_tr.y)
+
+            source = ppb.Vector(source_x, source_y)
+            dest = ppb.Vector(dest_x, dest_y)
+
+            ParticleSystem.spawn(source, ev.color, dest,
+                opacity=ev.opacity, opacity_mode=ev.opacity_mode,
+            )
+        
+        repeat(ev.frequency, spawn_one, ev.lifespan)

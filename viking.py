@@ -55,11 +55,16 @@ class VikingAttack:
     dmg: int
 
 
+@dataclass
+class VikingDeath:
+    viking: 'Viking'
+
+
 # TODO: Make this not suck...?
 class State:
     
     @staticmethod
-    def enter_state(self, scene):
+    def enter_state(self, scene, signal):
         pass
 
     @staticmethod
@@ -67,19 +72,19 @@ class State:
         t = time.monotonic()
         if (ev.cloud_id is None or self.last_hit_by < ev.cloud_id) and self is ev.target:
             if ev.cloud_id is not None:
-                self.set_state('cooldown', ev.scene)
+                self.set_state('cooldown', ev.scene, signal)
                 self.last_hit = t
                 self.last_hit_by = ev.cloud_id
             self.hp -= 1
             if self.hp <= 0:
-                self.set_state('dieing', ev.scene)
+                self.set_state('dieing', ev.scene, signal)
             signal(CreateFloatingNumber(-1, self.position, (255, 0, 0)))
 
 
 class ApproachState(State):
 
     @staticmethod
-    def enter_state(self, scene):
+    def enter_state(self, scene, signal):
         self.sprite_base.image = VIKING_WALK
 
     @staticmethod
@@ -94,27 +99,27 @@ class ApproachState(State):
             h = (self.target.position - self.position).normalize()
             self.position += h * self.speed * ev.time_delta
         else:
-            self.set_state("cooldown", ev.scene)
+            self.set_state("cooldown", ev.scene, signal)
     
 class AttackState(State):
 
     @staticmethod
-    def enter_state(self, scene):
+    def enter_state(self, scene, signal):
         self.sprite_base.image = VIKING_BASE[0]
 
     @staticmethod
     def on_update(self, ev, signal):
         if self.target.health == 0:
             self.target = None
-            self.set_state('cooldown', ev.scene)
+            self.set_state('cooldown', ev.scene, signal)
         else:
             d = dist(self.position, self.target.position)
             if d <= 1.5:
                 signal(VikingAttack(self.target, self.atk))
                 self.sprite_base.image = Animation("resources/viking/attack_{0..4}.png", 10)
-                self.set_state("cooldown", ev.scene)
+                self.set_state("cooldown", ev.scene, signal)
             else:
-                self.set_state("approach", ev.scene)
+                self.set_state("approach", ev.scene, signal)
 
 
 class CooldownState(State):
@@ -129,20 +134,20 @@ class CooldownState(State):
                     self.target = choice(list(ev.scene.get(tag='mushroom')))
                 except IndexError:
                     self.target = None
-                    self.set_state("cooldown", ev.scene)
+                    self.set_state("cooldown", ev.scene, signal)
             
             if self.target:
                 d = dist(self.position, self.target.position)
                 if d <= 1.5:
-                    self.set_state("attack", ev.scene)
+                    self.set_state("attack", ev.scene, signal)
                 else:
-                    self.set_state("approach", ev.scene)
+                    self.set_state("approach", ev.scene, signal)
 
 
 class DieingState(State):
 
     @staticmethod
-    def enter_state(self, scene):
+    def enter_state(self, scene, signal):
         self.sprite_base.image = ppb.Image("resources/viking/dead_bg.png")
         for s in self.sprites:
             tweening.tween(s, 'rotation', 90, 0.5)
@@ -150,21 +155,22 @@ class DieingState(State):
         tweening.tween(self, 'position', s.position + ppb.Vector(-0.5, -0.25), 0.5)
         self.sprite_fg.opacity = 255
 
-        for mushroom in scene.get(tag='mushroom'):
-            d = (mushroom.position - self.position).length
-            if d < 3:
-                self.nearest_mushroom = mushroom
-                self.particle_timer = repeat(0.025, lambda: DieingState.spore_particle(self))
-                mushroom.absorbing = get_time() + 5.0
-                break
+        # for mushroom in scene.get(tag='mushroom'):
+        #     d = (mushroom.position - self.position).length
+        #     if d < 3:
+        #         self.nearest_mushroom = mushroom
+        #         self.particle_timer = repeat(0.025, lambda: DieingState.spore_particle(self))
+        #         mushroom.absorbing = get_time() + 5.0
+        #         break
+        signal(VikingDeath(self))
     
-    @staticmethod
-    def spore_particle(self):
-        origin = self.position + ppb.Vector(-0.5 + random(), 0)
-        heading = self.position + ppb.Vector(-0.5 + random(), 1.0 + random())
-        ParticleSystem.spawn(origin, COLOR['YELLOW'], heading,
-            opacity=255, opacity_mode=ppb.flags.BlendModeBlend,
-        )
+    # @staticmethod
+    # def spore_particle(self):
+    #     origin = self.position + ppb.Vector(-0.5 + random(), 0)
+    #     heading = self.position + ppb.Vector(-0.5 + random(), 1.0 + random())
+    #     ParticleSystem.spawn(origin, COLOR['YELLOW'], heading,
+    #         opacity=255, opacity_mode=ppb.flags.BlendModeBlend,
+    #     )
 
     @staticmethod
     def on_update(self, ev, signal):
@@ -235,11 +241,11 @@ class Viking(ppb.Sprite):
         yield self.sprite_hat
         yield self.sprite_fg
 
-    def set_state(self, state, scene):
+    def set_state(self, state, scene, signal):
         if self.state != STATES[state]:
             self.last_state_change = time.monotonic()
             self.state = STATES[state]
-            self.state.enter_state(self, scene)
+            self.state.enter_state(self, scene, signal)
 
     def state_time(self):
         return time.monotonic() - self.last_state_change
@@ -290,7 +296,7 @@ class Viking(ppb.Sprite):
 
 class VikingSpawnCtrl:
     active: bool = False
-    wave_number: int = 5
+    wave_number: int = 1
 
     @classmethod
     def create(cls, scene):
