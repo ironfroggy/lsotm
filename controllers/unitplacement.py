@@ -5,7 +5,7 @@ from sdl2 import (
     SDL_FLIP_VERTICAL,
 )
 
-from constants import COLOR
+from constants import *
 from controllers.meters import CtrlMeter
 from systems import ui
 from utils.imagesequence import Sequence 
@@ -22,7 +22,7 @@ FRAMES_TOXINS = Sequence("resources/meter/l4_meter_{1..13}.png")
 class MushroomPlacementMarker(ppb.Sprite):
     image: ppb.Image = ppb.Image("resources/mushroom/mushroom_0.png")
     size: float = 0.0
-    layer: float = 200
+    layer: float = LAYER_GAMEPLAY_UI
     tint = COLOR['WHITE']
 
 
@@ -76,7 +76,7 @@ class UnitPlacementCtrl:
     # TODO: Create mushrooms through events
     def create_mushroom(self, cls, position, signal):
         # TODO: create different kinds
-        mushroom = cls(position=position, layer=10)
+        mushroom = cls(position=position, layer=LAYER_GAMEPLAY_LOW)
         self.scene.add(mushroom, tags=['mushroom'])
         # TODO: Create meters through events
         CtrlMeter.create(self.scene, FRAMES_HEALTH, target=mushroom, attr='health', track=mushroom, color=COLOR['RED'])
@@ -87,7 +87,7 @@ class UnitPlacementCtrl:
             image=ppb.Image("resources/root_1.png"),
             position=position - ppb.Vector(0, 0.5),
             size=6,
-            layer=9,
+            layer=LAYER_GROUND_HIGHLIGHT,
             opacity=0,
         )
         self.scene.add(mushroom.root)        

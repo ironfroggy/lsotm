@@ -2,6 +2,8 @@ import random
 
 import ppb
 
+from constants import *
+
 
 class TilemapInitialization:
     pass
@@ -16,7 +18,7 @@ class TilemapCtrl:
     active: bool = False
     width: int = 26
     height: int = 16
-    layer: int = -1
+    layer: int = LAYER_BACKGROUND
 
     @classmethod
     def create(cls, scene, **kwargs):
@@ -25,7 +27,7 @@ class TilemapCtrl:
         tc.setup(scene)
         return tc
     
-    def __init__(self, width=26, height=16, layer=-1, images=TILE_IMAGES):
+    def __init__(self, width=26, height=16, layer=LAYER_BACKGROUND, images=TILE_IMAGES):
         self.layer = layer
         self.width = width
         self.height = height

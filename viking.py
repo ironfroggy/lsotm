@@ -11,7 +11,7 @@ from ppb.utils import get_time
 
 import ppb_tween as tweening
 
-from constants import COLOR
+from constants import *
 from events import ScorePoints
 from systems.floatingnumbers import CreateFloatingNumber
 from utils.statemachine import StateMachine
@@ -58,6 +58,7 @@ class VikingAttack:
 @dataclass
 class VikingDeath:
     viking: 'Viking'
+    claimed: bool = False
 
 
 # TODO: Make this not suck...?
@@ -179,10 +180,6 @@ class DieingState(State):
             ev.scene.remove(self.sprite_base)
             ev.scene.remove(self.sprite_clothes)
             ev.scene.remove(self.sprite_hat)
-
-            if self.nearest_mushroom:
-                signal(ScorePoints(1))
-                signal(CreateFloatingNumber(1, self.position + ppb.Vector(0, 1), COLOR['YELLOW']))
         
         if self.state_time() >= 4.5 and self.particle_timer:
             self.particle_timer.cancel()
@@ -217,7 +214,7 @@ class Viking(ppb.Sprite):
     last_hit: float = 0.0
     last_hit_by: int = 0
     target: ppb.Sprite = None
-    nearest_mushroom: 'mushrooms.Mushroom' = None
+    # nearest_mushroom: 'mushrooms.Mushroom' = None
 
     sprite_base: ppb.Sprite = None
     sprite_hat: ppb.Sprite = None
@@ -323,7 +320,7 @@ class VikingSpawnCtrl:
                     
                 for i, strength in enumerate(strengths):
                     ev.scene.add(Viking(
-                        layer=10,
+                        layer=LAYER_GAMEPLAY_LOW,
                         position=ppb.Vector(-10 + i, 0),
                         strength=strength,
                     ), tags=['viking'])

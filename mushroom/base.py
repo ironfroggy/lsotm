@@ -9,13 +9,14 @@ from ppb.events import ButtonPressed, ButtonReleased, Update
 from controllers.meters import MeterUpdate, MeterRemove
 from systems.floatingnumbers import CreateFloatingNumber
 from systems.particles import ParticleSpawnerCreate
-from ppb_timing import repeat
 from systems import ui
 
 from utils.spritedepth import pos_to_layer
 
+from ppb_timing import repeat, delay
 from ppb_tween import tween
 
+from events import *
 from constants import *
 
 
@@ -77,7 +78,7 @@ class Mushroom(ppb.sprites.Sprite):
     def on_viking_death(self, ev, signal):
         v = ev.viking.position
         d = (self.position - v).length
-        if d < self.absorb_radius:
+        if d < self.absorb_radius and not ev.claimed:
             self.absorbing = get_time() + 5.0
             signal(ParticleSpawnerCreate(
                 source=(v + ppb.Vector(-1, -0.4), v),
@@ -85,3 +86,6 @@ class Mushroom(ppb.sprites.Sprite):
                 color=COLOR['YELLOW'],
                 lifespan=5.0,
             ))
+            delay(5.0, lambda: signal(ScorePoints(1)))
+            delay(5.0, lambda: signal(CreateFloatingNumber(1, ev.viking.position + ppb.Vector(0, 1), COLOR['YELLOW'])))
+            ev.claimed = True

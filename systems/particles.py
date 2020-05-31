@@ -6,7 +6,7 @@ import ppb
 
 from ppb_tween import Tweener
 
-from constants import COLOR
+from constants import *
 from ppb_timing import delay, repeat
 
 
@@ -70,7 +70,7 @@ class ParticleSystem(ppb.systemslib.System):
         s.position = pos
         s.rotation = randint(0, 260)
         s.size = sizing[0]
-        s.layer = 1000
+        s.layer = LAYER_HUD
         cls.t.tween(s, 'opacity', 0, 0.5, easing='cubic_in')
         cls.t.tween(s, 'size', sizing[1], 0.5, easing='linear')
         if heading:

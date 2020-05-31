@@ -7,7 +7,7 @@ from sdl2 import (
 import ppb
 from ppb import flags
 
-from constants import COLOR
+from constants import *
 from ppb_timing import delay
 from utils.imagesequence import Sequence
 
@@ -37,7 +37,7 @@ class CtrlMeter:
             image=image_seq.copy(),
             position=track.position,
             size=self.size,
-            layer=200,
+            layer=LAYER_METER,
             tint=color,
             flip=flip,
             opacity=0,

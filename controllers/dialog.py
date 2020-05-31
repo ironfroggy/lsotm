@@ -11,11 +11,10 @@ from ppb_timing import delay
 from ppb_tween import tween
 
 import scenes
+from constants import *
 
 
 V = ppb.Vector
-
-MENU_LAYER = 1000
 
 
 class DialogCtrl:
@@ -30,21 +29,21 @@ class DialogCtrl:
         ctrl.bg = ppb.Sprite(
             image=Square(G, G, G),
             size=0.0,
-            layer=MENU_LAYER,
+            layer=LAYER_HUD,
             opacity=225,
         )
         scene.add(ctrl.bg)
 
-        ctrl.title = Text('Last Stand of the Mushrooms', V(0, 2), layer=MENU_LAYER + 1, size=0.0)
+        ctrl.title = Text('Last Stand of the Mushrooms', V(0, 2), layer=LAYER_HUD + 1, size=0.0)
         scene.add(ctrl.title)
 
-        ctrl.opt_start = Text('resume', V(0, -1), layer=MENU_LAYER + 1, size=0.0)
+        ctrl.opt_start = Text('resume', V(0, -1), layer=LAYER_HUD + 1, size=0.0)
         scene.add(ctrl.opt_start)
 
-        ctrl.opt_restart = Text('restart', V(0, -2), layer=MENU_LAYER + 1, size=0.0)
+        ctrl.opt_restart = Text('restart', V(0, -2), layer=LAYER_HUD + 1, size=0.0)
         scene.add(ctrl.opt_restart)
 
-        ctrl.opt_quit = Text('quit', V(0, -3), layer=MENU_LAYER + 1, size=0.0)
+        ctrl.opt_quit = Text('quit', V(0, -3), layer=LAYER_HUD + 1, size=0.0)
         scene.add(ctrl.opt_quit)
 
         # TODO: Make this configurable
