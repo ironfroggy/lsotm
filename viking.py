@@ -18,7 +18,7 @@ from utils.statemachine import StateMachine
 from utils.spritedepth import pos_to_layer
 
 from systems.particles import ParticleSystem
-from systems.timer import repeat, cancel
+from ppb_timing import repeat
 
 # from vikings.corpse import CorpseCtrl
 
@@ -185,7 +185,7 @@ class DieingState(State):
                 signal(CreateFloatingNumber(1, self.position + ppb.Vector(0, 1), COLOR['YELLOW']))
         
         if self.state_time() >= 4.5 and self.particle_timer:
-            cancel(self.particle_timer)
+            self.particle_timer.cancel()
     
     @staticmethod
     def on_mushroom_attack(self, ev, signal):

@@ -7,7 +7,7 @@ import ppb
 from ppb_tween import Tweener
 
 from constants import COLOR
-from systems.timer import delay, repeat
+from ppb_timing import delay, repeat
 
 
 # TODO: what is the advantage of an event over a simple exported function?

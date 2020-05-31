@@ -13,7 +13,7 @@ from events import ScorePoints
 from controllers.meters import MeterUpdate, MeterRemove
 from cloud import MushroomAttack
 from .base import Mushroom
-from systems.timer import delay
+from ppb_timing import delay
 
 
 

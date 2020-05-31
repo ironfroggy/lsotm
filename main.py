@@ -16,9 +16,9 @@ from ppb.systems import SoundController
 from ppb.systems import Updater
 
 from ppb_tween import Tweener, Tweening, tween
+from ppb_timing import Timers
 
 from systems.floatingnumbers import FloatingNumberSystem
-from systems.timer import Timers, delay, repeat, cancel
 from systems.renderer import CustomRenderer
 from systems.text import Text
 from systems.particles import ParticleSystem

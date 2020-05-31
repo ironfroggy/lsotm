@@ -7,7 +7,7 @@ from viking import VikingSpawnCtrl
 
 from constants import COLOR
 from scenes.paused import PausedScene
-from systems.timer import delay
+from ppb_timing import delay
 
 
 class GameScene(ppb.BaseScene):

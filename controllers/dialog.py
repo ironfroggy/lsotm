@@ -6,7 +6,7 @@ from ppb.systemslib import System
 
 from events import *
 from systems.text import Text
-from systems.timer import delay
+from ppb_timing import delay
 
 from ppb_tween import tween
 

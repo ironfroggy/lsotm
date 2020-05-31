@@ -9,7 +9,7 @@ from ppb.events import ButtonPressed, ButtonReleased, Update
 from controllers.meters import MeterUpdate, MeterRemove
 from systems.floatingnumbers import CreateFloatingNumber
 from systems.particles import ParticleSpawnerCreate
-from systems.timer import repeat
+from ppb_timing import repeat
 from systems import ui
 
 from utils.spritedepth import pos_to_layer

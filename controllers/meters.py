@@ -8,7 +8,7 @@ import ppb
 from ppb import flags
 
 from constants import COLOR
-from systems.timer import delay
+from ppb_timing import delay
 from utils.imagesequence import Sequence
 
 from ppb_tween import Tweener

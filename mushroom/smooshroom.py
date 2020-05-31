@@ -11,7 +11,7 @@ import ppb_tween as tweening
 import constants as C
 from events import ScorePoints
 from controllers.meters import MeterUpdate, MeterRemove
-from systems.timer import delay
+from ppb_timing import delay
 from cloud import MushroomAttack
 from .base import Mushroom
 
