@@ -67,6 +67,14 @@ class State:
     @staticmethod
     def enter_state(self, scene, signal):
         pass
+    
+    @staticmethod
+    def on_update(self, ev, signal):
+        pass
+    
+    @staticmethod
+    def on_pre_render(self, ev, signal):
+        pass
 
     @staticmethod
     def on_mushroom_attack(self, ev, signal):
@@ -87,10 +95,9 @@ class ApproachState(State):
     @staticmethod
     def enter_state(self, scene, signal):
         self.sprite_base.image = VIKING_WALK
-
+    
     @staticmethod
-    def on_update(self, ev, signal):
-        t = time.monotonic()
+    def on_pre_render(self, ev, signal):
         if not self.target or not self.target.health:
             mushrooms = list(ev.scene.get(tag='mushroom'))
             if mushrooms:
@@ -98,7 +105,7 @@ class ApproachState(State):
         d = dist(self.position, self.target.position)
         if d >= 1.5:
             h = (self.target.position - self.position).normalize()
-            self.position += h * self.speed * ev.time_delta
+            self.position += h * self.speed * self.time_delta
         else:
             self.set_state("cooldown", ev.scene, signal)
     
@@ -230,6 +237,7 @@ class Viking(ppb.Sprite):
         self.atk = max(1, self.strength - self.hp)
         super().__init__(*args, **kwargs)
         self.state = ApproachState
+        self.last_frame = get_time()
     
     @property
     def sprites(self):
@@ -249,6 +257,9 @@ class Viking(ppb.Sprite):
 
     def on_pre_render(self, ev, signal):
         layer = pos_to_layer(self.position)
+        t = get_time()
+        self.time_delta = t - self.last_frame
+        self.last_frame = t
 
         if self.sprite_base is None:
             self.sprite_base = ppb.Sprite(
@@ -269,6 +280,8 @@ class Viking(ppb.Sprite):
             ev.scene.add(self.sprite_clothes)
             ev.scene.add(self.sprite_hat)
             ev.scene.add(self.sprite_fg)
+        
+        self.state.on_pre_render(self, ev, signal)
 
         self.sprite_base.position = self.position
         self.sprite_base.layer = layer

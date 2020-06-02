@@ -37,16 +37,21 @@ from scenes.title import TitleScene
 
 class DiagnosticSystem(ppb.systemslib.System):
     last_frame = perf_counter()
+    frames = [0.0 for i in range(10)]
 
     # def on_pre_render(self, ev, signal):
-    #     obj_count = len(list(ev.scene))
+    #     # obj_count = len(list(ev.scene))
     #     cur_frame = perf_counter()
+    #     f = (1.0 / (cur_frame - self.last_frame))
     #     self.last_frame = cur_frame
+    #     self.frames.append(f)
+    #     print(sum(self.frames) / 10.0)
+    #     del self.frames[0]
 
 
 ppb.run(
     starting_scene=TitleScene,
-    basic_systems=(CustomRenderer, Updater, EventPoller, SoundController, AssetLoadingSystem),
+    basic_systems=(CustomRenderer, Updater(0.1), EventPoller, SoundController, AssetLoadingSystem),
     systems=[
         Tweening,
         Timers,
@@ -58,5 +63,5 @@ ppb.run(
     ],
     resolution=(1280, 720),
     window_title='🍄Last Stand of the Mushrooms🍄',
-    target_frame_rate=999,
+    target_frame_rate=60,
 )

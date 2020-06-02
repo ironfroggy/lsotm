@@ -104,7 +104,7 @@ class UnitPlacementCtrl:
         )
         self.scene.add(mushroom.root)        
 
-    def on_update(self, ev, signal):
+    def on_pre_render(self, ev, signal):
         if self.mode == "placing":
             self.radius_start = self.radius_start.rotate(20 * ev.time_delta)
             v = self.radius_start

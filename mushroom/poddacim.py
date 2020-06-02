@@ -47,7 +47,7 @@ class Poddacim(Mushroom):
     def on_button_released(self, ev: ButtonPressed, signal):
         self.smooshed = False
 
-    def on_update(self, ev: Update, signal):
+    def on_update(self, ev, signal):
         t = perf_counter()
         r = 0.25 if self.smooshed else 1.0
 
@@ -62,6 +62,7 @@ class Poddacim(Mushroom):
                     tweening.tween(pod, 'position', vikings[0].position, 0.25)
                     ev.scene.add(pod)
                     self.toxins = max(0.0, round(self.toxins - C.PODDACIM_POD_RATE, 2))
+                    # TODO: Change meter updates to references
                     signal(MeterUpdate(self, 'toxins', self.toxins))
 
                     # When toxins hit 0, Poddacim becomes exhausted
@@ -80,4 +81,5 @@ class Poddacim(Mushroom):
             # When toxins are full, no longer exhausted
             if self.toxins == 1.0:
                 self.exhausted = False
+            # TODO: Change meter updates to references
             signal(MeterUpdate(self, 'toxins', self.toxins, flash=self.exhausted))
