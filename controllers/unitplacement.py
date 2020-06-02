@@ -26,6 +26,14 @@ class MushroomPlacementMarker(ppb.Sprite):
     tint = COLOR['WHITE']
 
 
+class RadiusMarker(ppb.Sprite):
+    image = ppb.Image("resources/Spore.png")
+    tint = COLOR['BLUE']
+    opacity_mode = ppb.flags.BlendModeAdd
+    layer = LAYER_GAMEPLAY_UI
+    size = 0.0
+
+
 class UnitPlacementCtrl:
     """The Mushroom Placement System is responsible for:
     - Invoking the UI elements for selecting new units to place
@@ -59,8 +67,12 @@ class UnitPlacementCtrl:
         ctrl.scene = scene
         ctrl.mode = "waiting"
         ctrl.marker = MushroomPlacementMarker()
+        ctrl.radius = [RadiusMarker() for i in range(24)]
+
         scene.add(ctrl.marker)
-        
+        for r in ctrl.radius:
+            scene.add(r)
+
         signal(ui.CreateButton("Smooshroom", enabled=False))
         signal(ui.DisableButton("Smooshroom"))
 
@@ -91,7 +103,16 @@ class UnitPlacementCtrl:
             opacity=0,
         )
         self.scene.add(mushroom.root)        
-    
+
+    def on_update(self, ev, signal):
+        if self.mode == "placing":
+            self.radius_start = self.radius_start.rotate(20 * ev.time_delta)
+            v = self.radius_start
+            for r in self.radius:
+                r.size = 0.25
+                r.position = self.marker.position + v
+                v = v.rotate(360 / len(self.radius))
+
     def on_score_updated(self, ev, signal):
         if ev.points >= 3:
             signal(ui.EnableButton("Smooshroom"))
@@ -111,6 +132,14 @@ class UnitPlacementCtrl:
             self.place_type = Poddacim
             self.marker.size = 2.0
             self.marker.image = self.place_type.smoosh_sprites[0]
+
+        if self.mode == "placing":
+            v = ppb.Vector(0, self.place_type.PLACEMENT_RADIUS)
+            self.radius_start = v
+            for r in self.radius:
+                r.size = 0.25
+                r.position = self.marker.position + v
+                v = v.rotate(360 / len(self.radius))
     
     def on_button_released(self, ev, signal):
         if self.mode == "placing" and self.can_place:
@@ -118,6 +147,10 @@ class UnitPlacementCtrl:
             self.mode = "waiting"
             signal(ScorePoints(-3))
             self.marker.size = 0.0
+        
+        if self.mode != "placing":
+            for r in self.radius:
+                r.size = 0.0
     
     def on_mouse_motion(self, ev, signal):
         self.marker.position = ev.position

@@ -11,7 +11,7 @@ import ppb_tween as tweening
 import constants as C
 from events import ScorePoints
 from controllers.meters import MeterUpdate, MeterRemove
-from cloud import MushroomAttack
+from systems.cloud import MushroomAttack
 from .base import Mushroom
 from ppb_timing import delay
 
@@ -36,6 +36,8 @@ class Poddacim(Mushroom):
     last_shot: float = 0.0
     smooshed: bool = False
     exhausted: bool = False
+
+    PLACEMENT_RADIUS = C.PODDACIM_ATK_RADIUS
 
     def on_button_pressed(self, ev: ButtonPressed, signal):
         clicked = super().on_button_pressed(ev, signal)

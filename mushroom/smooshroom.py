@@ -12,7 +12,7 @@ import constants as C
 from events import ScorePoints
 from controllers.meters import MeterUpdate, MeterRemove
 from ppb_timing import delay
-from cloud import MushroomAttack
+from systems.cloud import MushroomAttack
 from .base import Mushroom
 
 
@@ -48,6 +48,8 @@ class Smooshroom(Mushroom):
     cloud: float = 0.0
     cloud_id: int = 0
     cloud_radius: float = 0.0
+
+    PLACEMENT_RADIUS = C.SMOOSHROOM_CLOUD_RADIUS_MAX
 
     def on_button_pressed(self, ev: ButtonPressed, signal):
         clicked = super().on_button_pressed(ev, signal)

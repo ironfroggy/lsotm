@@ -18,13 +18,12 @@ from ppb.systems import Updater
 from ppb_tween import Tweener, Tweening, tween
 from ppb_timing import Timers
 
+from systems.cloud import CloudSystem
 from systems.floatingnumbers import FloatingNumberSystem
 from systems.renderer import CustomRenderer
 from systems.text import Text
 from systems.particles import ParticleSystem
 from systems import ui
-
-from cloud import CloudSystem
 
 from viking import Viking
 
@@ -39,10 +38,10 @@ from scenes.title import TitleScene
 class DiagnosticSystem(ppb.systemslib.System):
     last_frame = perf_counter()
 
-    def on_pre_render(self, ev, signal):
-        obj_count = len(list(ev.scene))
-        cur_frame = perf_counter()
-        self.last_frame = cur_frame
+    # def on_pre_render(self, ev, signal):
+    #     obj_count = len(list(ev.scene))
+    #     cur_frame = perf_counter()
+    #     self.last_frame = cur_frame
 
 
 ppb.run(

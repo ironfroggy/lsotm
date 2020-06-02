@@ -5,9 +5,8 @@ import ppb
 from ppb.systemslib import System
 
 from systems import text
+from constants import *
 
-
-LAYER = 500
 
 def dist(v1, v2):
     a = abs(v1.x - v2.x) ** 2
@@ -87,10 +86,11 @@ class UISystem(System):
 
         element = UIButton(label=ev.label, enabled=ev.enabled)
         element.position = ppb.Vector(-5 + len(self.ui_elements) * 2.0, 5)
+        element.layer = LAYER_HUD
         ev.scene.add(element)
         self.ui_elements[ev.label] = element
 
-        label = text.Text(ev.label, position=element.position, size=1.0)
+        label = text.Text(ev.label, position=element.position, size=1.0, layer=LAYER_HUD+1)
         label.scene = ev.scene
         ev.scene.add(label)
         label.setup()
