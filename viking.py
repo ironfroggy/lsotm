@@ -16,6 +16,7 @@ from events import ScorePoints
 from systems.floatingnumbers import CreateFloatingNumber
 from utils.statemachine import StateMachine
 from utils.spritedepth import pos_to_layer
+from controllers.tilemap import TilemapCtrl
 
 from systems.particles import ParticleSystem
 from ppb_timing import repeat
@@ -99,11 +100,12 @@ class ApproachState(State):
     @staticmethod
     def on_pre_render(self, ev, signal):
         if not self.target or not self.target.health:
-            mushrooms = list(ev.scene.get(tag='mushroom'))
-            if mushrooms:
-                self.target = choice(mushrooms)
+            self.find_next_target(ev.scene)
         d = dist(self.position, self.target.position)
-        if d >= 1.5:
+        if d < 0.05:
+            self.route_step += 1
+            self.find_next_target(ev.scene)
+        elif d >= self.target.approach_distance:
             h = (self.target.position - self.position).normalize()
             self.position += h * self.speed * self.time_delta
         else:
@@ -139,14 +141,15 @@ class CooldownState(State):
         if self.state_time() >= 1.0:
             if not self.target or not self.target.health:
                 try:
-                    self.target = choice(list(ev.scene.get(tag='mushroom')))
+                    self.find_next_target(ev.scene)
                 except IndexError:
                     self.target = None
                     self.set_state("cooldown", ev.scene, signal)
             
             if self.target:
                 d = dist(self.position, self.target.position)
-                if d <= 1.5:
+
+                if d <= self.target.approach_distance:
                     self.set_state("attack", ev.scene, signal)
                 else:
                     self.set_state("approach", ev.scene, signal)
@@ -220,6 +223,8 @@ class Viking(ppb.Sprite):
     strength: int = 1
     last_hit: float = 0.0
     last_hit_by: int = 0
+
+    route_step: int = 0
     target: ppb.Sprite = None
     # nearest_mushroom: 'mushrooms.Mushroom' = None
 
@@ -233,7 +238,7 @@ class Viking(ppb.Sprite):
 
     def __init__(self, *args, **kwargs):
         self.strength = kwargs.pop('strength')
-        self.hp = max(1, self.strength // 2)
+        self.hp = max(1, self.strength)
         self.atk = max(1, self.strength - self.hp)
         super().__init__(*args, **kwargs)
         self.state = ApproachState
@@ -245,6 +250,24 @@ class Viking(ppb.Sprite):
         yield self.sprite_clothes
         yield self.sprite_hat
         yield self.sprite_fg
+    
+    def find_next_target(self, scene):
+        routepoints = scene.get(tag='routepoint')
+        routepoints = [r for r in routepoints if r.n == self.route_step]
+        if routepoints:
+            for r in routepoints:
+                r.__viking_distance = (r.position - self.position).length
+            routepoints.sort(key=lambda r: r.__viking_distance)
+            closest = routepoints[0].__viking_distance
+            routepoints = [r for r in routepoints if r.__viking_distance - closest < 0.05]
+            
+            self.target = choice(routepoints)
+        else:
+            mushrooms = list(scene.get(tag='mushroom'))
+            if mushrooms:
+                
+
+                self.target = choice(mushrooms)
 
     def set_state(self, state, scene, signal):
         if self.state != STATES[state]:
@@ -331,10 +354,10 @@ class VikingSpawnCtrl:
                         strengths.append(strength)
                         danger -= strength
                     
-                for i, strength in enumerate(strengths):
+                for i, strength in enumerate(strengths*10):
                     ev.scene.add(Viking(
                         layer=LAYER_GAMEPLAY_LOW,
-                        position=ppb.Vector(-10 + i, 0),
+                        position=ppb.Vector(-10 - i, 0),
                         strength=strength,
                     ), tags=['viking'])
             

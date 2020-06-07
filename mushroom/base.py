@@ -27,6 +27,7 @@ class PlaceNewMushroom:
 
 class Mushroom(ppb.sprites.Sprite):
     size: float = 2.0
+    approach_distance: float = 1.5
 
     health: int = 10
 
