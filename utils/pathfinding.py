@@ -1,3 +1,12 @@
+import math
+
+
+def dist(v1, v2):
+    a = abs(v1[0] - v2[0]) ** 2
+    b = abs(v1[1] - v2[1]) ** 2
+    return math.sqrt(a + b)
+
+
 class AStarPathFinder:
 
     def __init__(self, size):
@@ -22,6 +31,9 @@ class AStarPathFinder:
     
     def unblock(self, po):
         self.blocks[pos] = True
+    
+    def set_start(self, pos):
+        self.start = pos
     
     def set_end(self, pos):
         self.end = pos
@@ -60,16 +72,20 @@ class AStarPathFinder:
         cp = self.start
         cs = self.scores[cp]
         cycles = 0
-        print(cp)
         yield cp
         while cp != self.end and cycles < 10:
+            candidates = []
             for d in ((0,1), (0,-1), (1,0), (-1,0)):
                 np = (cp[0]+d[0], cp[1]+d[1])
                 ns = self.scores.get(np)
                 if ns is not None and ns < cs:
-                    cp = np
-                    cs = ns
-                    yield cp
-                    break
-            assert cp == np, cp
+                    nd = dist(np, self.end)
+                    candidates.append((nd, ns, np))
+            
+            if candidates:
+                candidates.sort()
+                candidates = [c for c in candidates if c[0] == candidates[0][0]]
+                _, cs, cp = candidates[0]
+                yield cp
+            # assert cp == np, cp
             cycles += 1

@@ -4,6 +4,7 @@ import random
 import ppb
 
 from utils.spritedepth import pos_to_layer
+from utils.pathfinding import AStarPathFinder
 from constants import *
 
 
@@ -76,11 +77,11 @@ TREE_V = ppb.Image("resources/ground/tree_vertical.png")
 
 MAP = """
 t1 -- t4 t5 t6 -- --
-t2 P1 -- P2 -- -- --
+t2 -- -- -- -- -- --
 t3 -- t1 -- -- -- --
--- P0 t2 MS -- -- --
+-- -- t2 MS -- -- --
 t1 -- t3 -- -- -- --
-t2 P1 -- P2 -- -- --
+t2 -- -- -- -- -- --
 t3 -- t4 t5 t5 t6 --
 """
 
@@ -104,7 +105,7 @@ def parse_map(map_str):
     map = {}
     for i, row in enumerate(rows):
         for j, code in enumerate(row.split()):
-            x, y = j-map_width//2, -i+map_height//2
+            x, y = j - map_width // 2, -i + map_height // 2
             if code == '--':
                 cell = None
             else:
@@ -122,7 +123,7 @@ class TilemapCtrl:
     @classmethod
     def create(cls, scene, **kwargs):
         tc = TilemapCtrl(**kwargs)
-        scene.add(tc)
+        scene.add(tc, tags=['controller', 'tilemapctrl'])
         tc.setup(scene)
         return tc
     
@@ -133,6 +134,7 @@ class TilemapCtrl:
         self.images = images
         self.tiles = []
         self.objects = {}
+        self.pathfinder = AStarPathFinder(50)
     
     def setup(self, scene):
         for y in range(-self.height//2, -self.height//2 + self.height):
@@ -163,6 +165,7 @@ class TilemapCtrl:
                     if t:
                         scene.add(t, tags=[t.tag])
                         self.objects[cell.x, cell.y] = t
+                        self.pathfinder.block((cell.x, cell.y))
     
     def on_key_released(self, ev, signal):
         if self.active:

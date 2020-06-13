@@ -16,7 +16,6 @@ from events import ScorePoints
 from systems.floatingnumbers import CreateFloatingNumber
 from utils.statemachine import StateMachine
 from utils.spritedepth import pos_to_layer
-from controllers.tilemap import TilemapCtrl
 
 from systems.particles import ParticleSystem
 from ppb_timing import repeat
@@ -101,12 +100,15 @@ class ApproachState(State):
     def on_pre_render(self, ev, signal):
         if not self.target or not self.target.health:
             self.find_next_target(ev.scene)
-        d = dist(self.position, self.target.position)
-        if d < 0.05:
+
+        ds = dist(self.position, self.next_pos)
+        dt = dist(self.position, self.target.position)
+        if ds < 0.05:
             self.route_step += 1
             self.find_next_target(ev.scene)
-        elif d >= self.target.approach_distance:
-            h = (self.target.position - self.position).normalize()
+        
+        if dt >= self.target.approach_distance:
+            h = (self.next_pos - self.position).normalize()
             self.position += h * self.speed * self.time_delta
         else:
             self.set_state("cooldown", ev.scene, signal)
@@ -123,7 +125,7 @@ class AttackState(State):
             self.target = None
             self.set_state('cooldown', ev.scene, signal)
         else:
-            d = dist(self.position, self.target.position)
+            d = dist(self.position, self.next_pos)
             if d <= 1.5:
                 signal(VikingAttack(self.target, self.atk))
                 self.sprite_base.image = Animation("resources/viking/attack_{0..4}.png", 10)
@@ -147,7 +149,7 @@ class CooldownState(State):
                     self.set_state("cooldown", ev.scene, signal)
             
             if self.target:
-                d = dist(self.position, self.target.position)
+                d = dist(self.position, self.next_pos)
 
                 if d <= self.target.approach_distance:
                     self.set_state("attack", ev.scene, signal)
@@ -252,22 +254,32 @@ class Viking(ppb.Sprite):
         yield self.sprite_fg
     
     def find_next_target(self, scene):
-        routepoints = scene.get(tag='routepoint')
-        routepoints = [r for r in routepoints if r.n == self.route_step]
-        if routepoints:
-            for r in routepoints:
-                r.__viking_distance = (r.position - self.position).length
-            routepoints.sort(key=lambda r: r.__viking_distance)
-            closest = routepoints[0].__viking_distance
-            routepoints = [r for r in routepoints if r.__viking_distance - closest < 0.05]
+        # routepoints = scene.get(tag='routepoint')
+        # routepoints = [r for r in routepoints if r.n == self.route_step]
+        # if routepoints:
+        #     for r in routepoints:
+        #         r.__viking_distance = (r.position - self.position).length
+        #     routepoints.sort(key=lambda r: r.__viking_distance)
+        #     closest = routepoints[0].__viking_distance
+        #     routepoints = [r for r in routepoints if r.__viking_distance - closest < 0.05]
             
-            self.target = choice(routepoints)
-        else:
-            mushrooms = list(scene.get(tag='mushroom'))
-            if mushrooms:
-                
+        #     self.target = choice(routepoints)
+        # else:
+        mushrooms = list(scene.get(tag='mushroom'))
+        if mushrooms:
+            m = choice(mushrooms)
+            start = (round(self.position.x), round(self.position.y))
+            end = (round(m.position.x), round(m.position.y))
+            pf = next(scene.get(tag='tilemapctrl')).pathfinder
 
-                self.target = choice(mushrooms)
+            pf.set_start(start)
+            pf.set_end(end)
+            pf.score_cells()
+            path = pf.follow_path()
+
+            self.target = m
+            next(path)
+            self.next_pos = ppb.Vector(next(path))
 
     def set_state(self, state, scene, signal):
         if self.state != STATES[state]:

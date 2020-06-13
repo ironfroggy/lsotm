@@ -27,6 +27,7 @@ MUSHROOM_SPRITES = [
 
 class PoddacimPod(ppb.Sprite):
     image = ppb.Image("resources/mushroom/pod.png")
+    layer = 1000
 
 
 class Poddacim(Mushroom):
@@ -59,7 +60,7 @@ class Poddacim(Mushroom):
                 dist = (vikings[0].position - self.position).length
                 if dist < C.PODDACIM_ATK_RADIUS:
                     pod = PoddacimPod(position=self.position)
-                    tweening.tween(pod, 'position', vikings[0].position, 0.25)
+                    tweening.tween(pod, 'position', vikings[0].position, C.PODDACIM_POD_SPEED)
                     ev.scene.add(pod)
                     self.toxins = max(0.0, round(self.toxins - C.PODDACIM_POD_RATE, 2))
                     # TODO: Change meter updates to references
@@ -72,7 +73,7 @@ class Poddacim(Mushroom):
                     def _():
                         vikings[0].on_mushroom_attack(MushroomAttack(None, vikings[0], C.PODDACIM_POD_DMG, scene=ev.scene), signal)
                         ev.scene.remove(pod)
-                    delay(0.25, _)
+                    delay(C.PODDACIM_POD_SPEED, _)
 
         # If the mushroom isn't being smooshed, increase toxin accumulator
         # and reset the cloud accumulator.
