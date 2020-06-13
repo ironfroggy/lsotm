@@ -30,20 +30,25 @@ class RoutePoint:
         return f"<RoutePoint n={self.n}>"
 
 
-class Decoration(ppb.Sprite):
+class MapItem(ppb.Sprite):
+    def __init__(self, *args, **kwargs):
+        self.mapitemtype = kwargs.pop('mapitemtype')
+        super().__init__(*args, **kwargs)
+
     # PPB Events
     def on_pre_render(self, ev, signal):
         self.layer = pos_to_layer(self.position) - 5.0
 
 
-def make_decor(image, rect):
+def make_mapitem(image, rect, mapitemtype):
     def _(x, y):
-        t = Decoration(
+        t = MapItem(
             image=image,
             position=ppb.Vector(x, y),
             rect=rect,
             layer=LAYER_BACKGROUND+1,
             size=2.0,
+            mapitemtype=mapitemtype,
         )
         t.tag = "decor"
         return t
@@ -59,11 +64,12 @@ def make_routepoint(n):
     return _
 
 
+SOLID = 1
+DECOR = 2
 GROUND_IMAGES = [
     ppb.Image(f"resources/ground/ground_{r}.png")
     for r in range(6)
 ]
-
 TREE_H = ppb.Image("resources/ground/tree_horizontal.png")
 TREE_V = ppb.Image("resources/ground/tree_vertical.png")
 
@@ -79,12 +85,12 @@ t3 -- t4 t5 t5 t6 --
 """
 
 ITEMS = {
-    't1': make_decor(TREE_V, (0,  0, 32, 32)),
-    't2': make_decor(TREE_V, (0, 32, 32, 32)),
-    't3': make_decor(TREE_V, (0, 64, 32, 32)),
-    't4': make_decor(TREE_H, (0,  0, 32, 32)),
-    't5': make_decor(TREE_H, (32, 0, 32, 32)),
-    't6': make_decor(TREE_H, (64, 0, 32, 32)),
+    't1': make_mapitem(TREE_V, (0,  0, 32, 32), SOLID),
+    't2': make_mapitem(TREE_V, (0, 32, 32, 32), SOLID),
+    't3': make_mapitem(TREE_V, (0, 64, 32, 32), SOLID),
+    't4': make_mapitem(TREE_H, (0,  0, 32, 32), SOLID),
+    't5': make_mapitem(TREE_H, (32, 0, 32, 32), SOLID),
+    't6': make_mapitem(TREE_H, (64, 0, 32, 32), SOLID),
 }
 for n in range(10):
     ITEMS[f'P{n}'] = make_routepoint(n)
