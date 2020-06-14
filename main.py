@@ -39,14 +39,14 @@ class DiagnosticSystem(ppb.systemslib.System):
     last_frame = perf_counter()
     frames = [0.0 for i in range(10)]
 
-    # def on_pre_render(self, ev, signal):
-    #     # obj_count = len(list(ev.scene))
-    #     cur_frame = perf_counter()
-    #     f = (1.0 / (cur_frame - self.last_frame))
-    #     self.last_frame = cur_frame
-    #     self.frames.append(f)
-    #     print(sum(self.frames) / 10.0)
-    #     del self.frames[0]
+    def on_pre_render(self, ev, signal):
+        # obj_count = len(list(ev.scene))
+        cur_frame = perf_counter()
+        f = (1.0 / (cur_frame - self.last_frame))
+        self.last_frame = cur_frame
+        self.frames.append(f)
+        print(sum(self.frames) / 10.0)
+        del self.frames[0]
 
 
 ppb.run(
@@ -59,7 +59,7 @@ ppb.run(
         CloudSystem,
         ui.UISystem,
         FloatingNumberSystem,
-        DiagnosticSystem,
+        # DiagnosticSystem,
     ],
     resolution=(1280, 720),
     window_title='🍄Last Stand of the Mushrooms🍄',

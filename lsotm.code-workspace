@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "..\\ppb-tweening"
+		},
+		{
+			"path": "..\\pursuedpybear"
+		},
+		{
+			"path": "..\\ppb-timing"
+		}
+	],
+	"settings": {
+		"command-runner.commands": {
+			"run game": ".\\lsotm.exe",
+			"test": "pytest"
+		}
+	},
+}
