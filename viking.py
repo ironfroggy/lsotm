@@ -206,7 +206,7 @@ def state_method(name):
 
 class Viking(ppb.Sprite):
     size: float = 0.0
-    speed: float = 1.0
+    speed: float = 1.5
     hp: int = 1
     atk: int = 1
     strength: int = 1
@@ -353,10 +353,10 @@ class VikingSpawnCtrl:
                         strengths.append(strength)
                         danger -= strength
                     
-                for i, strength in enumerate(strengths*10):
+                for i, strength in enumerate(strengths * 3):
                     ev.scene.add(Viking(
                         layer=LAYER_GAMEPLAY_LOW,
-                        position=ppb.Vector(-10 - i, 0),
+                        position=ppb.Vector(-10 - i * 1.5, 0),
                         strength=strength,
                     ), tags=['viking'])
             

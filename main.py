@@ -27,7 +27,7 @@ from systems import ui
 
 from viking import Viking
 
-from constants import COLOR
+from constants import *
 from events import *
 
 
@@ -39,23 +39,29 @@ class DiagnosticSystem(ppb.systemslib.System):
     last_frame = perf_counter()
     frames = [0.0 for i in range(10)]
 
+    enable_fps = DIAGNOSE_FPS
+    enable_objcount = DIAGNOSE_OBJCOUNT
+
     def report(self):
-        print(self.fps, len(self.scene.game_objects))
+        if self.enable_fps:
+            print('FPS:', self.fps, end='; ')
+        if self.enable_objcount:
+            print('OBJCOUNT:', len(self.scene.game_objects), end='; ')
+        print()
 
     def on_scene_started(self, ev, signal):
-        print('starting diagnostic...')
         self.scene = ev.scene
         self.fps = -1
         repeat(1.0, self.report)
 
     def on_pre_render(self, ev, signal):
-        # obj_count = len(list(ev.scene))
-        cur_frame = perf_counter()
-        f = (1.0 / (cur_frame - self.last_frame))
-        self.last_frame = cur_frame
-        self.frames.append(f)
-        self.fps = sum(self.frames) / 10.0
-        del self.frames[0]
+        if self.enable_fps:
+            cur_frame = perf_counter()
+            f = (1.0 / (cur_frame - self.last_frame))
+            self.last_frame = cur_frame
+            self.frames.append(f)
+            self.fps = sum(self.frames) / 10.0
+            del self.frames[0]
 
 
 ppb.run(
@@ -68,8 +74,7 @@ ppb.run(
         CloudSystem,
         ui.UISystem,
         FloatingNumberSystem,
-        DiagnosticSystem,
-    ],
+    ] + ([DiagnosticSystem] if DIAGNOSE else []),
     resolution=(1280, 720),
     window_title='🍄Last Stand of the Mushrooms🍄',
     target_frame_rate=60,
