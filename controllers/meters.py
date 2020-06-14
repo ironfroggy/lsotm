@@ -83,4 +83,5 @@ class CtrlMeter:
     def on_meter_remove(self, ev: MeterRemove, signal):
         if self.target == ev.target and (self.attr == ev.attr or ev.attr is None):
             ev.scene.remove(self.meter_sprite)
+            ev.scene.remove(self.tweener)
             ev.scene.remove(self)

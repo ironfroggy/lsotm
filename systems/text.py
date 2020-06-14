@@ -66,6 +66,11 @@ class Text:
     def setup(self):
         self.text = self._text
     
+    def remove(self, scene):
+        for l in self.letters:
+            scene.remove(l)
+        scene.remove(self)
+    
     def _get_alignment_offset(self):
         if self.align == 'center':
             align = -0.5 * len(self.text) * KERNING * self.size

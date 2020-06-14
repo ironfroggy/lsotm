@@ -167,23 +167,7 @@ class DieingState(State):
             tweening.tween(s, 'opacity', 0, 5.0)
         tweening.tween(self, 'position', s.position + ppb.Vector(-0.5, -0.25), 0.5)
         self.sprite_fg.opacity = 255
-
-        # for mushroom in scene.get(tag='mushroom'):
-        #     d = (mushroom.position - self.position).length
-        #     if d < 3:
-        #         self.nearest_mushroom = mushroom
-        #         self.particle_timer = repeat(0.025, lambda: DieingState.spore_particle(self))
-        #         mushroom.absorbing = get_time() + 5.0
-        #         break
         signal(VikingDeath(self))
-    
-    # @staticmethod
-    # def spore_particle(self):
-    #     origin = self.position + ppb.Vector(-0.5 + random(), 0)
-    #     heading = self.position + ppb.Vector(-0.5 + random(), 1.0 + random())
-    #     ParticleSystem.spawn(origin, COLOR['YELLOW'], heading,
-    #         opacity=255, opacity_mode=ppb.flags.BlendModeBlend,
-    #     )
 
     @staticmethod
     def on_update(self, ev, signal):
@@ -192,6 +176,9 @@ class DieingState(State):
             ev.scene.remove(self.sprite_base)
             ev.scene.remove(self.sprite_clothes)
             ev.scene.remove(self.sprite_hat)
+            ev.scene.remove(self.sprite_fg)
+            if self.particle_timer:
+                ev.scene.remove(self.particle_timer)
         
         if self.state_time() >= 4.5 and self.particle_timer:
             self.particle_timer.cancel()

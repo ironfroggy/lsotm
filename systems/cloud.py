@@ -11,6 +11,7 @@ import constants as C
 from utils.spritedepth import pos_to_layer
 
 import ppb_tween as tweening
+from ppb_timing import delay
 
 
 @dataclass
@@ -61,3 +62,4 @@ class CloudSystem(System):
             tweening.tween(cloud, "position", ev.position + heading, 1.0, easing='quint_out')
             tweening.tween(cloud, "size", 1.0, 1.0, easing='quad_out')
             tweening.tween(cloud, "opacity", 0.0, 1.0, easing='linear')
+            delay(1.0, lambda cloud=cloud: ev.scene.remove(cloud))

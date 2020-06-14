@@ -7,6 +7,7 @@ from ppb.systemslib import System
 from systems.text import Text
 
 from ppb_tween import tween
+from ppb_timing import delay
 
 
 @dataclass
@@ -25,3 +26,4 @@ class FloatingNumberSystem(System):
         T.setup()
         tween(T, 'position', ev.position + ppb.Vector(0, -1), 0.5)
         tween(T, 'opacity', 0, 0.5)
+        delay(0.5, lambda: T.remove(ev.scene))

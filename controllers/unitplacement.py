@@ -159,7 +159,8 @@ class UnitPlacementCtrl:
             for mushroom in ev.scene.get(tag='mushroom'):
                 d = (mushroom.position - ev.position).length
                 closest = min(closest, d)
-            if closest >= 1.5:
+
+            if 1.5 <= closest <= 2.5:
                 self.can_place = True
                 self.marker.tint = (0, 255, 0, 128) # COLOR['GREEN']
             else:
