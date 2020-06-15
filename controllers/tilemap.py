@@ -19,18 +19,6 @@ class MapCell:
     code: str
 
 
-@dataclass
-class RoutePoint:
-    n: int
-    approach_distance: float = 0.0
-
-    def __hash__(self):
-        return hash(("routepoint", id(self)))
-    
-    def __repr__(self):
-        return f"<RoutePoint n={self.n}>"
-
-
 class MapItem(ppb.Sprite):
     def __init__(self, *args, **kwargs):
         self.mapitemtype = kwargs.pop('mapitemtype')
@@ -52,15 +40,6 @@ def make_mapitem(image, rect, mapitemtype):
             mapitemtype=mapitemtype,
         )
         t.tag = "decor"
-        return t
-    return _
-
-def make_routepoint(n):
-    def _(x, y):
-        t = RoutePoint(n)
-        t.health = None
-        t.position = ppb.Vector(x, y)
-        t.tag = "routepoint"
         return t
     return _
 
@@ -93,8 +72,6 @@ ITEMS = {
     't5': make_mapitem(TREE_H, (32, 0, 32, 32), SOLID),
     't6': make_mapitem(TREE_H, (64, 0, 32, 32), SOLID),
 }
-for n in range(10):
-    ITEMS[f'P{n}'] = make_routepoint(n)
 
 
 def parse_map(map_str):
@@ -150,7 +127,6 @@ class TilemapCtrl:
         
         # Load map objects, which can be:
         # - Decorative items on the map (tree strumps, rocks, etc.)
-        # - Route Points, marking the path vikings take through the level
         # - Mushroom Spawn, marking the place the first mushroom spawns
         # - Exit, marking a spot on the map which ends the level when a mushroom is placed
 
