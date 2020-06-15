@@ -31,6 +31,7 @@ class Mushroom(ppb.sprites.Sprite):
 
     health: int = 10
 
+    growing: bool = False
     absorbing: float = 0.0
     absorb_radius: float = 3.0
 
@@ -45,8 +46,8 @@ class Mushroom(ppb.sprites.Sprite):
     def on_pre_render(self, ev, signal):
         self.layer = pos_to_layer(self.position)
         t = get_time()
-        if self.absorbing > t:
-            s = (cos((self.absorbing - t + 1.0) * pi) + 1.0) * 0.5
+        if self.absorbing > t or self.growing:
+            s = (cos((self.absorbing - t + 1.0) * pi) + 1.0) * 0.5 + 0.5
             o = round(64 * s)
             self.root.opacity = o
         elif self.root.opacity > 0:
