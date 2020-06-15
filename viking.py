@@ -95,23 +95,32 @@ class ApproachState(State):
     @staticmethod
     def enter_state(self, scene, signal):
         self.sprite_base.image = VIKING_WALK
+        self.find_next_target(scene)
     
     @staticmethod
     def on_pre_render(self, ev, signal):
         if not self.target or not self.target.health:
-            self.find_next_target(ev.scene)
-
-        ds = dist(self.position, self.next_pos)
-        dt = dist(self.position, self.target.position)
-        if ds < 0.05:
-            self.route_step += 1
-            self.find_next_target(ev.scene)
-        
-        if dt >= self.target.approach_distance:
-            h = (self.next_pos - self.position).normalize()
-            self.position += h * self.speed * self.time_delta
-        else:
             self.set_state("cooldown", ev.scene, signal)
+        elif not self.next_pos:
+            self.set_state("cooldown", ev.scene, signal)
+        else:
+            # Distances from the viking to the next point in the path and to
+            # the final target
+            ds = dist(self.position, self.next_pos)
+            dt = dist(self.position, self.target.position)
+
+            # If we've reached the next point in the path but we still aren't at
+            # the final target, move along in the path points.
+            if ds < 0.05 and self.target_path_step < len(self.target_path) - 1:
+                self.target_path_step += 1
+
+            # If we're still further from the target, keep walking
+            if self.next_pos is None:
+                self.set_state("cooldown", ev.scene, signal)
+            else:
+                h = (self.next_pos - self.position).normalize()
+                self.position += h * self.speed * self.time_delta
+                
     
 class AttackState(State):
 
@@ -149,7 +158,7 @@ class CooldownState(State):
                     self.set_state("cooldown", ev.scene, signal)
             
             if self.target:
-                d = dist(self.position, self.next_pos)
+                d = dist(self.position, self.target.position)
 
                 if d <= self.target.approach_distance:
                     self.set_state("attack", ev.scene, signal)
@@ -213,7 +222,8 @@ class Viking(ppb.Sprite):
     last_hit: float = 0.0
     last_hit_by: int = 0
 
-    route_step: int = 0
+    target_path_step: int = 0
+    target_path: typing.List[typing.Tuple[float, float]] = None
     target: ppb.Sprite = None
     # nearest_mushroom: 'mushrooms.Mushroom' = None
 
@@ -234,6 +244,16 @@ class Viking(ppb.Sprite):
         self.last_frame = get_time()
     
     @property
+    def next_pos(self):
+        if not self.target_path:
+            return None
+        else:
+            try:
+                return ppb.Vector(self.target_path[self.target_path_step])
+            except IndexError:
+                return None
+    
+    @property
     def sprites(self):
         yield self.sprite_base
         yield self.sprite_clothes
@@ -241,17 +261,6 @@ class Viking(ppb.Sprite):
         yield self.sprite_fg
     
     def find_next_target(self, scene):
-        # routepoints = scene.get(tag='routepoint')
-        # routepoints = [r for r in routepoints if r.n == self.route_step]
-        # if routepoints:
-        #     for r in routepoints:
-        #         r.__viking_distance = (r.position - self.position).length
-        #     routepoints.sort(key=lambda r: r.__viking_distance)
-        #     closest = routepoints[0].__viking_distance
-        #     routepoints = [r for r in routepoints if r.__viking_distance - closest < 0.05]
-            
-        #     self.target = choice(routepoints)
-        # else:
         mushrooms = list(scene.get(tag='mushroom'))
         if mushrooms:
             m = choice(mushrooms)
@@ -265,8 +274,10 @@ class Viking(ppb.Sprite):
             path = pf.follow_path()
 
             self.target = m
-            next(path)
-            self.next_pos = ppb.Vector(next(path))
+            self.target_path = list(path)
+            self.target_path_step = 1 # 0 is the current position
+
+            assert self.target_path[-1] == end, (self.target_path[-1], end)
 
     def set_state(self, state, scene, signal):
         if self.state != STATES[state]:
@@ -302,7 +313,7 @@ class Viking(ppb.Sprite):
             ev.scene.add(self.sprite_clothes)
             ev.scene.add(self.sprite_hat)
             ev.scene.add(self.sprite_fg)
-        
+
         self.state.on_pre_render(self, ev, signal)
 
         self.sprite_base.position = self.position
@@ -356,7 +367,7 @@ class VikingSpawnCtrl:
                 for i, strength in enumerate(strengths * 3):
                     ev.scene.add(Viking(
                         layer=LAYER_GAMEPLAY_LOW,
-                        position=ppb.Vector(-10 - i * 1.5, 0),
+                        position=ppb.Vector(-20 - i * 1.5, 0),
                         strength=strength,
                     ), tags=['viking'])
             

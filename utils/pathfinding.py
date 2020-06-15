@@ -73,7 +73,7 @@ class AStarPathFinder:
         cs = self.scores[cp]
         cycles = 0
         yield cp
-        while cp != self.end and cycles < 10:
+        while cp != self.end and cycles < self.size**2:
             candidates = []
             for d in ((0,1), (0,-1), (1,0), (-1,0)):
                 np = (cp[0]+d[0], cp[1]+d[1])
@@ -87,5 +87,4 @@ class AStarPathFinder:
                 candidates = [c for c in candidates if c[0] == candidates[0][0]]
                 _, cs, cp = candidates[0]
                 yield cp
-            # assert cp == np, cp
             cycles += 1
