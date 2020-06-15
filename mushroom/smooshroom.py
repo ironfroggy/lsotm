@@ -99,6 +99,8 @@ class Smooshroom(Mushroom):
         if ev.target is self:
             self.smooshed = True
 
+            self.cloud += C.SMOOSHROOM_TOXIN_DMG_RATE
+            self.toxins -= C.SMOOSHROOM_TOXIN_DMG_RATE
             self.cloud_radius = 0.5
             self.cloud_id = int(perf_counter() * 1000)
             tweening.tween(self, "cloud_radius", C.SMOOSHROOM_CLOUD_RADIUS_MAX, C.SMOOSHROOM_CLOUD_RADIUS_TIME, easing='quad_out')

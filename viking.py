@@ -147,9 +147,9 @@ class CooldownState(State):
 
     @staticmethod
     def on_update(self, ev, signal):
-        if self.state_time() >= 0.5:
+        if True: # self.state_time() >= 0.5:
             self.sprite_base.image = VIKING_BASE[0]
-        if self.state_time() >= 1.0:
+        if True: # self.state_time() >= 1.0:
             if not self.target or not self.target.health:
                 try:
                     self.find_next_target(ev.scene)
@@ -367,7 +367,7 @@ class VikingSpawnCtrl:
                 for i, strength in enumerate(strengths * 3):
                     ev.scene.add(Viking(
                         layer=LAYER_GAMEPLAY_LOW,
-                        position=ppb.Vector(-20 - i * 1.5, 0),
+                        position=ppb.Vector(-15 - i * 1.5, 0),
                         strength=strength,
                     ), tags=['viking'])
             
