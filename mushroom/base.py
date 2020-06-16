@@ -31,7 +31,7 @@ class Mushroom(ppb.sprites.Sprite):
 
     health: int = 10
 
-    growing: bool = False
+    growing: float = 0.0
     absorbing: float = 0.0
     absorb_radius: float = 3.0
 

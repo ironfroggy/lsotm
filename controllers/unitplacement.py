@@ -13,6 +13,8 @@ from controllers.meters import MeterUpdate, MeterRemove
 from controllers.tilemap import TilemapCtrl
 from events import ScorePoints, ScoreUpdated
 
+from ppb_tween import Tweener
+
 from mushroom import Smooshroom, Poddacim
 
 FRAMES_HEALTH = Sequence("resources/meter/semimeter{1..25}.png")
@@ -61,8 +63,7 @@ class UnitPlacementCtrl:
     def create(cls, scene, signal):
         ctrl = cls()
 
-        # images = [ppb.Image("resources/root_0.png")]
-        # ctrl.tilemap = TilemapCtrl.create(scene, layer=0, images=images)
+        ctrl.tweener = Tweener()
 
         ctrl.scene = scene
         ctrl.mode = "waiting"
@@ -147,6 +148,7 @@ class UnitPlacementCtrl:
             self.mode = "waiting"
             signal(ScorePoints(-3))
             self.marker.size = 0.0
+            self.tweener.cancel()
         
         if self.mode != "placing":
             for r in self.radius:
@@ -169,7 +171,8 @@ class UnitPlacementCtrl:
                 self.can_place = True
                 self.marker.tint = (0, 255, 0, 128) # COLOR['GREEN']
                 if closest_mushroom:
-                    closest_mushroom.growing = True
+                    closest_mushroom.growing = 1.0
+                    self.tweener.tween(closest_mushroom, 'growing', 1.0, 0.0, 1.0)
             else:
                 self.can_place = False
                 self.marker.tint = COLOR['RED']
