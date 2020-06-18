@@ -23,6 +23,7 @@ from systems.floatingnumbers import FloatingNumberSystem
 from systems.renderer import CustomRenderer
 from systems.text import Text
 from systems.particles import ParticleSystem
+from systems.progress import ProgressSystem
 from systems import ui
 
 from viking import Viking
@@ -74,6 +75,7 @@ ppb.run(
         CloudSystem,
         ui.UISystem,
         FloatingNumberSystem,
+        ProgressSystem,
     ] + ([DiagnosticSystem] if DIAGNOSE else []),
     resolution=(1280, 720),
     window_title='🍄Last Stand of the Mushrooms🍄',

@@ -72,7 +72,7 @@ class MonsterSpawn:
     monster: object
 
 @dataclass
-class PlayerDeath:
+class MushroomDeath:
     player: object
 
 @dataclass

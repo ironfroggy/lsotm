@@ -73,6 +73,8 @@ class Mushroom(ppb.sprites.Sprite):
             signal(CreateFloatingNumber(-1, self.position, (255, 0, 0)))
             signal(MeterUpdate(self, 'health', self.health / 10))
             if self.health <= 0:
+                signal(MushroomDeath(self))
+                # TODO: Move to event handler for above
                 ev.scene.remove(self)
                 ev.scene.remove(self.root)
                 signal(MeterRemove(self))
