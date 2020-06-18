@@ -13,6 +13,10 @@ from ppb_timing import delay
 class GameScene(ppb.BaseScene):
     background_color = COLOR['BLACK']
 
+    def __init__(self, level):
+        super().__init__()
+        self.level = level
+
     def on_scene_started(self, ev, signal):
         self.setup_scene(ev.scene, signal)
     

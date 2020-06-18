@@ -53,17 +53,6 @@ GROUND_IMAGES = [
 TREE_H = ppb.Image("resources/ground/tree_horizontal.png")
 TREE_V = ppb.Image("resources/ground/tree_vertical.png")
 
-
-MAP = """
-t1 -- t4 t5 t6 -- --
-t2 -- -- -- -- -- --
-t3 -- t1 -- -- -- --
--- -- t2 MS -- -- --
-t1 -- t3 -- -- -- --
-t2 -- -- -- -- -- --
-t3 -- t4 t5 t5 t6 --
-"""
-
 ITEMS = {
     't1': make_mapitem(TREE_V, (0,  0, 32, 32), SOLID),
     't2': make_mapitem(TREE_V, (0, 32, 32, 32), SOLID),
@@ -73,9 +62,12 @@ ITEMS = {
     't6': make_mapitem(TREE_H, (64, 0, 32, 32), SOLID),
 }
 
+def load_map(level):
+    map_txt = open(f"resources/maps/level{level}.txt").read()
+    return map_txt
 
 def parse_map(map_str):
-    lines = MAP.strip().split('\n')
+    lines = map_str.strip().split('\n')
     map_width = len(lines[0].split())
     map_height = len(lines)
     rows = map_str.strip().split('\n')
@@ -130,7 +122,8 @@ class TilemapCtrl:
         # - Mushroom Spawn, marking the place the first mushroom spawns
         # - Exit, marking a spot on the map which ends the level when a mushroom is placed
 
-        for cell in parse_map(MAP).values():
+        map_txt = load_map(scene.level)
+        for cell in parse_map(map_txt).values():
             if cell:
                 try:
                     factory = ITEMS[cell.code]

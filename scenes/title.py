@@ -2,7 +2,7 @@ import ppb
 
 from constants import COLOR
 from ppb.events import StartScene
-from scenes.game import GameScene
+from scenes.worldmap import WorldmapScene
 
 
 class TitleScene(ppb.BaseScene):
@@ -16,4 +16,4 @@ class TitleScene(ppb.BaseScene):
         ev.scene.add(logo)
     
     def on_key_released(self, ev, signal):
-        signal(StartScene(GameScene))
+        signal(StartScene(WorldmapScene))
