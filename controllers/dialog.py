@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import ppb
 from ppb.keycodes import Escape
 from ppb.events import Quit, StopScene, StartScene
@@ -17,13 +19,19 @@ from constants import *
 V = ppb.Vector
 
 
+@dataclass
+class DialogOption:
+    option: str
+
+
 class DialogCtrl:
     active: bool = True
     menu_active = True
 
     @classmethod
-    def create(cls, scene, signal):
+    def create(cls, scene):
         ctrl = cls()
+        ctrl.opt_texts = []
 
         G = 32
         ctrl.bg = ppb.Sprite(
@@ -34,38 +42,16 @@ class DialogCtrl:
         )
         scene.add(ctrl.bg)
 
-        ctrl.title = Text('Last Stand of the Mushrooms', V(0, 2), layer=LAYER_HUD + 1, size=0.0)
-        scene.add(ctrl.title)
+        ctrl.txt_title = Text(ctrl.title, V(0, 2), layer=LAYER_HUD + 1, size=0.0)
+        scene.add(ctrl.txt_title)
 
-        ctrl.opt_start = Text('resume', V(0, -1), layer=LAYER_HUD + 1, size=0.0)
-        scene.add(ctrl.opt_start)
-
-        ctrl.opt_restart = Text('restart', V(0, -2), layer=LAYER_HUD + 1, size=0.0)
-        scene.add(ctrl.opt_restart)
-
-        ctrl.opt_quit = Text('quit', V(0, -3), layer=LAYER_HUD + 1, size=0.0)
-        scene.add(ctrl.opt_quit)
-
-        # TODO: Make this configurable
-        ctrl.options = (
-            (ctrl.opt_start, lambda: signal(StopScene())),
-            (ctrl.opt_restart, lambda: ctrl.restart_game(signal)),
-            (ctrl.opt_quit, lambda: signal(Quit())),
-        )
+        for i, option in enumerate(ctrl.options, 1):
+            txt_option = Text(option, V(0, -i), layer=LAYER_HUD + 1, size=0.0)
+            scene.add(txt_option)
+            ctrl.opt_texts.append(txt_option)
 
         scene.add(ctrl)
         return ctrl
-    
-    def restart_game(self, signal):
-        signal(StopScene())
-        delay(0, lambda: signal(RestartGame()))
-
-    # TODO: Probably drop?
-    def on_start_game(self, ev, signal):
-        self.close_menu()
-    
-    def on_player_death(self, ev, signal):
-        self.open_menu()
 
     def on_toggle_menu(self, ev, signal):
         if self.menu_active:
@@ -77,19 +63,17 @@ class DialogCtrl:
     
     def close_menu(self):
         tween(self.bg, 'size', 0.0, 1.0, easing='bounce_out')
-        tween(self.opt_start, 'size', 0.0, 0.5, easing='quad_in')
-        tween(self.opt_restart, 'size', 0.0, 0.5, easing='quad_in')
-        tween(self.opt_quit, 'size', 0.0, 0.5, easing='quad_in')
-        tween(self.title, 'size', 0.0, 0.5, easing='quad_in')
+        for opt in self.opt_texts:
+            tween(opt, 'size', 0.0, 0.5, easing='quad_in')
+        tween(self.txt_title, 'size', 0.0, 0.5, easing='quad_in')
 
         self.menu_active = False
     
     def open_menu(self):
         tween(self.bg, 'size', 8.0, 1.0, easing='bounce_out')
-        tween(self.opt_start, 'size', 2.0, 1.0, easing='bounce_out')
-        tween(self.opt_restart, 'size', 2.0, 1.0, easing='bounce_out')
-        tween(self.opt_quit, 'size', 2.0, 1.0, easing='bounce_out')
-        tween(self.title, 'size', 2.0, 1.0, easing='bounce_out')
+        for opt in self.opt_texts:
+            tween(opt, 'size', 2.0, 1.0, easing='bounce_out')
+        tween(self.txt_title, 'size', 2.0, 1.0, easing='bounce_out')
 
         self.menu_active = True
 
@@ -98,9 +82,9 @@ class DialogCtrl:
             x = ev.position.x
             y = ev.position.y
 
-            for opt, callback in self.options:
+            for opt in self.opt_texts:
                 dx = abs(x - opt.position.x)
                 dy = abs(y - opt.position.y)
 
                 if dy < 0.25 and dx < 1.5:
-                    callback()
+                    signal(DialogOption(opt.text))

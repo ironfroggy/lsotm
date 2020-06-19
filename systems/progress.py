@@ -14,6 +14,7 @@ from ppb_timing import delay
 
 
 class ProgressSystem(System):
+
     def on_mushroom_death(self, ev: MushroomDeath, signal):
         remaining = list(ev.scene.get(tag='mushroom'))
         if not remaining:
