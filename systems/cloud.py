@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 import math
 import random
-from time import perf_counter
 
 import ppb
 from ppb.systemslib import System

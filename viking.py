@@ -127,18 +127,23 @@ class AttackState(State):
     @staticmethod
     def enter_state(self, scene, signal):
         self.sprite_base.image = VIKING_BASE[0]
+        self.attack_cooldown = 1.0
 
     @staticmethod
     def on_update(self, ev, signal):
         if self.target.health == 0:
             self.target = None
             self.set_state('cooldown', ev.scene, signal)
+            return
+
+        if self.attack_cooldown > 0.0:
+            self.attack_cooldown -= ev.time_delta
         else:
             d = dist(self.position, self.next_pos)
             if d <= 1.5:
                 signal(VikingAttack(self.target, self.atk))
+                self.attack_cooldown = 1.0
                 self.sprite_base.image = Animation("resources/viking/attack_{0..4}.png", 10)
-                self.set_state("cooldown", ev.scene, signal)
             else:
                 self.set_state("approach", ev.scene, signal)
 
@@ -360,7 +365,7 @@ class VikingSpawnCtrl:
                         strengths.append(strength)
                         danger -= strength
                     
-                for i, strength in enumerate(strengths * 3):
+                for i, strength in enumerate(strengths * 1):
                     ev.scene.add(Viking(
                         layer=LAYER_GAMEPLAY_LOW,
                         position=ppb.Vector(-15 - i * 1.5, 0),

@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from math import cos, pi
-from time import perf_counter
 
 import ppb
 from ppb.utils import get_time
@@ -58,7 +57,7 @@ class Mushroom(ppb.sprites.Sprite):
         if d < 1.0:
             self.smooshed = True
             self.smoosh_time = 0.0
-            self.pressed_time = perf_counter()
+            self.pressed_time = get_time()
         return d < 1.0
     
     def on_button_released(self, ev: ButtonReleased, signal):

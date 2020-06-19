@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 import math
-from time import perf_counter
 
 import ppb
+from ppb.utils import get_time
 from ppb.events import ButtonPressed, ButtonReleased, Update
 from ppb.systemslib import System
 
@@ -33,7 +33,7 @@ class EmitCloud:
 
 def debounce(obj, marker, delay):
     v = getattr(obj, marker, 0.0)
-    t = perf_counter()
+    t = get_time()
     if v + delay < t:
         setattr(obj, marker, t)
         return True
@@ -56,7 +56,7 @@ class Smooshroom(Mushroom):
         if clicked:
             # TODO: This is pretty cludging and won't always match the visual clouds
             self.cloud_radius = 0.5
-            self.cloud_id = int(perf_counter() * 1000)
+            self.cloud_id = int(get_time() * 1000)
             tweening.tween(self, "cloud_radius", C.SMOOSHROOM_CLOUD_RADIUS_MAX, C.SMOOSHROOM_CLOUD_RADIUS_TIME, easing='quad_out')
 
     def on_update(self, ev: Update, signal):
@@ -79,13 +79,13 @@ class Smooshroom(Mushroom):
             # emit clouds and clear the accumulator.
             if self.cloud >= C.SMOOSHROOM_TOXIN_DMG_RATE:
                 signal(EmitCloud(self.position, self.cloud_id))
-                self.pressed_time = perf_counter()
+                self.pressed_time = get_time()
                 self.cloud -= C.SMOOSHROOM_TOXIN_DMG_RATE
 
                 for viking in ev.scene.get(tag='viking'):
                     d = (viking.position - self.position).length
                     if d <= self.cloud_radius + 0.5:
-                        viking.on_mushroom_attack(MushroomAttack(perf_counter(), viking, scene=ev.scene), signal)
+                        viking.on_mushroom_attack(MushroomAttack(get_time(), viking, scene=ev.scene), signal)
 
         # If the mushroom isn't being smooshed, increase toxin accumulator
         # and reset the cloud accumulator.
@@ -102,7 +102,7 @@ class Smooshroom(Mushroom):
             self.cloud += C.SMOOSHROOM_TOXIN_DMG_RATE
             self.toxins -= C.SMOOSHROOM_TOXIN_DMG_RATE
             self.cloud_radius = 0.5
-            self.cloud_id = int(perf_counter() * 1000)
+            self.cloud_id = int(get_time() * 1000)
             tweening.tween(self, "cloud_radius", C.SMOOSHROOM_CLOUD_RADIUS_MAX, C.SMOOSHROOM_CLOUD_RADIUS_TIME, easing='quad_out')
 
             delay(0.25, lambda: setattr(self, 'smooshed', False))
