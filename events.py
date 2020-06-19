@@ -86,3 +86,11 @@ class ScoreSet:
 @dataclass
 class ScoreUpdated:
     points: int
+
+@dataclass
+class GameStart:
+    pass
+
+@dataclass
+class GameOver:
+    pass
