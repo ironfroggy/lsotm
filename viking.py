@@ -119,7 +119,7 @@ class ApproachState(State):
                 self.set_state("cooldown", ev.scene, signal)
             else:
                 h = (self.next_pos - self.position).normalize()
-                self.position += h * self.speed * self.time_delta
+                self.position += h * self.speed * ev.time_delta
                 
     
 class AttackState(State):
@@ -241,7 +241,6 @@ class Viking(ppb.Sprite):
         self.atk = max(1, self.strength - self.hp)
         super().__init__(*args, **kwargs)
         self.state = ApproachState
-        self.last_frame = get_time()
     
     @property
     def next_pos(self):
@@ -290,9 +289,6 @@ class Viking(ppb.Sprite):
 
     def on_pre_render(self, ev, signal):
         layer = pos_to_layer(self.position)
-        t = get_time()
-        self.time_delta = t - self.last_frame
-        self.last_frame = t
 
         if self.sprite_base is None:
             self.sprite_base = ppb.Sprite(
