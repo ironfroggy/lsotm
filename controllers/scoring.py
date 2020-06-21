@@ -9,7 +9,7 @@ from constants import COLOR
 class ScoreCtrl:
 
     @classmethod
-    def create(cls, scene):
+    def create(cls, scene, signal):
         ctrl = cls()
         ctrl.score = 0
         ctrl.text = Text(str(ctrl.score), ppb.Vector(0, 4), color=COLOR['YELLOW'])

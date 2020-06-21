@@ -53,5 +53,4 @@ class WorldmapScene(ppb.BaseScene):
         for i, pin in enumerate(self.pins, 1):
             d = (pin.position - ev.position).length
             if d < 0.5:
-                print("load", i)
                 signal(StartScene(GameScene(i)))

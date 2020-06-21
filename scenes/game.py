@@ -14,20 +14,32 @@ from events import *
 from ppb_timing import delay
 
 
-class GameOverDialog(DialogCtrl):
-    title = "Game Over!"
+class LevelCompleteDialog(DialogCtrl):
+    title = "Level Complete"
 
     options = (
-        'restart',
-        'quit',
+        'continue',
     )
 
     def on_dialog_option(self, ev: DialogOption, signal):
-        if ev.option == 'restart':
+        if ev.option == 'continue':
+            signal(StopScene())
+
+
+class LevelLostDialog(DialogCtrl):
+    title = "Level Lost"
+
+    options = (
+        'retry',
+        'menu',
+    )
+
+    def on_dialog_option(self, ev: DialogOption, signal):
+        if ev.option == 'retry':
             signal(StopScene())
             delay(0, lambda: signal(RestartGame()))
-        elif ev.option == 'quit':
-            signal(Quit())
+        elif ev.option == 'menu':
+            signal(StopScene())
 
 
 class GameScene(ppb.BaseScene):
@@ -36,14 +48,15 @@ class GameScene(ppb.BaseScene):
     def __init__(self, level):
         super().__init__()
         self.level = level
-        self.game_over_dialog = GameOverDialog.create(self)
+        self.game_over_dialog = LevelLostDialog.create(self)
+        self.level_complete_dialog = LevelCompleteDialog.create(self)
 
     def on_scene_started(self, ev, signal):
         self.setup_scene(ev.scene, signal)
     
     def setup_scene(self, scene, signal):
-        TilemapCtrl.create(scene)
-        ScoreCtrl.create(scene)
+        TilemapCtrl.create(scene, signal)
+        ScoreCtrl.create(scene, signal)
         UnitPlacementCtrl.create(scene, signal)
 
         viking_ctrl = VikingSpawnCtrl.create(scene)
@@ -61,3 +74,6 @@ class GameScene(ppb.BaseScene):
         if not remaining:
             signal(GameOver())
             self.game_over_dialog.open_menu()
+    
+    def on_level_goal_reached(self, ev, signal):
+        self.level_complete_dialog.open_menu()

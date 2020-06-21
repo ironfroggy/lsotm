@@ -365,7 +365,7 @@ class VikingSpawnCtrl:
                         strengths.append(strength)
                         danger -= strength
                     
-                for i, strength in enumerate(strengths * 1):
+                for i, strength in enumerate(strengths * 3):
                     ev.scene.add(Viking(
                         layer=LAYER_GAMEPLAY_LOW,
                         position=ppb.Vector(-15 - i * 1.5, 0),

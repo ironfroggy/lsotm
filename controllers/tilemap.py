@@ -3,20 +3,10 @@ import random
 
 import ppb
 
+from utils.level import LevelData, LevelLoaded
 from utils.spritedepth import pos_to_layer
 from utils.pathfinding import AStarPathFinder
 from constants import *
-
-
-class TilemapInitialization:
-    pass
-
-
-@dataclass
-class MapCell:
-    x: int
-    y: int
-    code: str
 
 
 class MapItem(ppb.Sprite):
@@ -62,26 +52,6 @@ ITEMS = {
     't6': make_mapitem(TREE_H, (64, 0, 32, 32), SOLID),
 }
 
-def load_map(level):
-    map_txt = open(f"resources/maps/level{level}.txt").read()
-    return map_txt
-
-def parse_map(map_str):
-    lines = map_str.strip().split('\n')
-    map_width = len(lines[0].split())
-    map_height = len(lines)
-    rows = map_str.strip().split('\n')
-    map = {}
-    for i, row in enumerate(rows):
-        for j, code in enumerate(row.split()):
-            x, y = j - map_width // 2, -i + map_height // 2
-            if code == '--':
-                cell = None
-            else:
-                cell = MapCell(x, y, code)
-            map[x, y] = cell
-    return map
-
 
 class TilemapCtrl:
     active: bool = False
@@ -90,10 +60,10 @@ class TilemapCtrl:
     layer: int = LAYER_BACKGROUND
 
     @classmethod
-    def create(cls, scene, **kwargs):
+    def create(cls, scene, signal, **kwargs):
         tc = TilemapCtrl(**kwargs)
         scene.add(tc, tags=['controller', 'tilemapctrl'])
-        tc.setup(scene)
+        tc.setup(scene, signal)
         return tc
     
     def __init__(self, width=26, height=16, layer=LAYER_BACKGROUND, images=GROUND_IMAGES):
@@ -105,14 +75,14 @@ class TilemapCtrl:
         self.objects = {}
         self.pathfinder = AStarPathFinder(50)
     
-    def setup(self, scene):
+    def setup(self, scene, signal):
         for y in range(-self.height//2, -self.height//2 + self.height):
             for x in range(-self.width//2, -self.width//2 + self.width):
                 t = ppb.Sprite(
                     image=random.choice(self.images),
                     position=ppb.Vector(x, y),
                     layer=self.layer,
-                    size=1.01
+                    size=1.01,
                 )
                 self.tiles.append(t)
                 scene.add(t)
@@ -122,8 +92,8 @@ class TilemapCtrl:
         # - Mushroom Spawn, marking the place the first mushroom spawns
         # - Exit, marking a spot on the map which ends the level when a mushroom is placed
 
-        map_txt = load_map(scene.level)
-        for cell in parse_map(map_txt).values():
+        level = LevelData(scene.level)
+        for cell in level.map_data.values():
             if cell:
                 try:
                     factory = ITEMS[cell.code]
@@ -135,6 +105,8 @@ class TilemapCtrl:
                         scene.add(t, tags=[t.tag])
                         self.objects[cell.x, cell.y] = t
                         self.pathfinder.block((cell.x, cell.y))
+        signal(LevelLoaded(scene.level, level))
+
     
     def on_key_released(self, ev, signal):
         if self.active:
