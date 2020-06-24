@@ -71,9 +71,8 @@ class DebugMessage:
 # TODO: Clear elements when scene ends / handle different scenes
 # Become a controller? Not sure yet.
 class UISystem(System):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+  
+    def on_scene_started(self, ev, signal):
         self.ui_elements = {}
 
     def on_create_button(self, ev, signal):
@@ -104,7 +103,3 @@ class UISystem(System):
     
     def on_debug_message(self, ev, signal):
         print('DEBUG', ev.msg)
-    
-    # def on_scene_started(self, ev, signal):
-    #     signal(CreateButton("Button 1", DebugMessage("clicked button 1")))
-    #     signal(CreateButton("Button 2", DebugMessage("clicked button 2")))

@@ -40,6 +40,10 @@ class MapCell:
     code: str
 
 
+class InvalidKeyError(KeyError):
+    pass
+
+
 class LevelData:
     def __init__(self, level_number):
         self.level_number = level_number
@@ -61,6 +65,14 @@ class LevelData:
             return self.map_data[key]
         else:
             raise KeyError("LevelData accepts str and (x, y) keys only.")
+    
+    def get(self, key, default):
+        try:
+            return self[key]
+        except InvalidKeyError:
+            raise
+        except KeyError:
+            return default
 
 
 @dataclass

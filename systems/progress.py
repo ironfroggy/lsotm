@@ -7,7 +7,6 @@ from ppb.events import *
 
 from controllers.dialog import DialogCtrl, DialogOption
 from scenes.worldmap import WorldmapScene
-from scenes.game import GameOverDialog
 from systems.text import Text
 from constants import *
 from events import *
