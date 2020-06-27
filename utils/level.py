@@ -25,10 +25,15 @@ def parse_properties(prop_str):
     properties = {}
     for line in prop_str.split('\n'):
         key, value = line.split('=', 1)
-        try:
-            value = float(value)
-        except ValueError:
-            pass
+        if value in ('true', 'false'):
+            value = value == 'true'
+        else:
+            try:
+                value = float(value)
+                if round(value) == value:
+                    value = int(round(value))
+            except ValueError:
+                pass
         properties[key] = value
     return properties
 
@@ -66,7 +71,7 @@ class LevelData:
         else:
             raise KeyError("LevelData accepts str and (x, y) keys only.")
     
-    def get(self, key, default):
+    def get(self, key, default=None):
         try:
             return self[key]
         except InvalidKeyError:

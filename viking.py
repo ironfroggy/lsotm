@@ -61,6 +61,11 @@ class VikingDeath:
     claimed: bool = False
 
 
+@dataclass
+class VikingSpawningDone:
+    pass
+
+
 # TODO: Make this not suck...?
 class State:
     
@@ -340,7 +345,7 @@ class Viking(ppb.Sprite):
 
 class VikingSpawnCtrl:
     active: bool = False
-    wave_number: int = 1
+    wave_number: int = 0
 
     @classmethod
     def create(cls, scene):
@@ -350,26 +355,58 @@ class VikingSpawnCtrl:
     
     def start(self):
         self.active = True
+    
+    def spawn_wave(self, scene, count, strength):
+        for i in range(count):
+            scene.add(Viking(
+                layer=LAYER_GAMEPLAY_LOW,
+                position=ppb.Vector(-15 - i * 1.5, 0),
+                strength=strength,
+            ), tags=['viking'])
+    
+    def on_level_loaded(self, ev, signal):
+        self.level = ev.level
 
     def on_update(self, ev, signal):
         if self.active:
             vikings = list(ev.scene.get(tag='viking'))
             if not vikings:
-                danger = self.wave_number
-                if danger % 10 == 0:
-                    strengths = [danger]
-                else:
-                    strengths = []
-                    while danger:
-                        strength = randint(1, danger)
-                        strengths.append(strength)
-                        danger -= strength
-                    
-                for i, strength in enumerate(strengths * 3):
-                    ev.scene.add(Viking(
-                        layer=LAYER_GAMEPLAY_LOW,
-                        position=ppb.Vector(-15 - i * 1.5, 0),
-                        strength=strength,
-                    ), tags=['viking'])
-            
                 self.wave_number += 1
+                # Spawn a new wave, all vikings have died.
+
+                # If the level defines waves, use that. Otherwise, randomize
+                # based on wave number.
+                if self.level.get('wave.1.count'):
+                    try:
+                        wave_count = self.level[f'wave.{self.wave_number}.count']
+                        wave_strength = self.level[f'wave.{self.wave_number}.strength']
+                        self.spawn_wave(ev.scene, wave_count, wave_strength)
+                    except KeyError:
+                        # If repeating, go back to wave 0
+                        if self.level.get('wave.repeat'):
+                            self.wave_number = 1
+                            wave_count = self.level[f'wave.{self.wave_number}.count']
+                            wave_strength = self.level[f'wave.{self.wave_number}.strength']
+                            self.spawn_wave(ev.scene, wave_count, wave_strength)
+                        else:
+                            # I guess... no more vikings?????
+                            signal(VikingSpawningDone())
+
+                # Randomize a wave of vikings based on a "danger" level
+                else:
+                    danger = self.wave_number
+                    if danger % 10 == 0:
+                        strengths = [danger]
+                    else:
+                        strengths = []
+                        while danger:
+                            strength = randint(1, danger)
+                            strengths.append(strength)
+                            danger -= strength
+                        
+                    for i, strength in enumerate(strengths * 3):
+                        ev.scene.add(Viking(
+                            layer=LAYER_GAMEPLAY_LOW,
+                            position=ppb.Vector(-15 - i * 1.5, 0),
+                            strength=strength,
+                        ), tags=['viking'])

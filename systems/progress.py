@@ -16,8 +16,10 @@ from ppb_timing import delay
 
 
 LEVEL_GOALS = [
-    'spores'
-]           
+    'spores',
+    'vikings',
+    'exit',
+]
 
 
 @dataclass
