@@ -360,12 +360,17 @@ class VikingSpawnCtrl:
         for i in range(count):
             scene.add(Viking(
                 layer=LAYER_GAMEPLAY_LOW,
-                position=ppb.Vector(-15 - i * 1.5, 0),
+                position=self.spawn_position - ppb.Vector(i * -1.5, 0),
                 strength=strength,
             ), tags=['viking'])
     
     def on_level_loaded(self, ev, signal):
         self.level = ev.level
+        try:
+            self.spawn_position = ppb.Vector(self.level.find_map_item('VS'))
+        except KeyError:
+            self.spawn_position = ppb.Vector(-15, 0)
+            assert 0
 
     def on_update(self, ev, signal):
         if self.active:
@@ -407,6 +412,6 @@ class VikingSpawnCtrl:
                     for i, strength in enumerate(strengths * 3):
                         ev.scene.add(Viking(
                             layer=LAYER_GAMEPLAY_LOW,
-                            position=ppb.Vector(-15 - i * 1.5, 0),
+                            position=self.spawn_position - ppb.Vector(i * -1.5, 0),
                             strength=strength,
                         ), tags=['viking'])
