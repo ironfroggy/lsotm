@@ -42,6 +42,7 @@ GROUND_IMAGES = [
 ]
 TREE_H = ppb.Image("resources/ground/tree_horizontal.png")
 TREE_V = ppb.Image("resources/ground/tree_vertical.png")
+EXIT = ppb.Image("resources/ground/exit.png")
 
 ITEMS = {
     't1': make_mapitem(TREE_V, (0,  0, 32, 32), SOLID),
@@ -50,6 +51,7 @@ ITEMS = {
     't4': make_mapitem(TREE_H, (0,  0, 32, 32), SOLID),
     't5': make_mapitem(TREE_H, (32, 0, 32, 32), SOLID),
     't6': make_mapitem(TREE_H, (64, 0, 32, 32), SOLID),
+    'EX': make_mapitem(EXIT, (0, 0, 32, 32), DECOR),
 }
 
 

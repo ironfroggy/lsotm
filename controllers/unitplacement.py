@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import ppb
 from ppb import flags
 
@@ -16,9 +18,16 @@ from events import ScorePoints, ScoreUpdated
 from ppb_tween import Tweener
 
 from mushroom import Smooshroom, Poddacim
+from mushroom.base import Mushroom
 
 FRAMES_HEALTH = Sequence("resources/meter/semimeter{1..25}.png")
 FRAMES_TOXINS = Sequence("resources/meter/l4_meter_{1..13}.png")
+
+
+@dataclass
+class MushroomPlaced:
+    position: ppb.Vector
+    mushroom: Mushroom
 
 
 class MushroomPlacementMarker(ppb.Sprite):
@@ -103,7 +112,9 @@ class UnitPlacementCtrl:
             layer=LAYER_GROUND_HIGHLIGHT,
             opacity=0,
         )
-        self.scene.add(mushroom.root)        
+        self.scene.add(mushroom.root)
+
+        signal(MushroomPlaced(position, mushroom))      
 
     def on_pre_render(self, ev, signal):
         if self.mode == "placing":

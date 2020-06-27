@@ -78,6 +78,12 @@ class LevelData:
             raise
         except KeyError:
             return default
+    
+    def find_map_item(self, code):
+        for coord, cell in self.map_data.items():
+            if cell and code == cell.code:
+                return coord
+        raise KeyError(f"Map does not contain key '{code}'")
 
 
 @dataclass

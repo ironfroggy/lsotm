@@ -46,7 +46,23 @@ class ProgressSystem(System):
             print(f"Unknown goal_type in level {ev.number}: {goal_type}")
         
         self.goal_reached = False
+        self.goal_type = goal_type
     
+    def on_mushroom_placed(self, ev, signal):
+        print('on_mushroom_placed', self.goal_type)
+        if not self.goal_reached and self.goal_type == 'exit':
+            try:
+                exit_pos = self.level.find_map_item('EX')
+            except KeyError:
+                print('!no exit position found')
+                pass
+            else:
+                d = (ppb.Vector(exit_pos) - ev.position).length
+                print('DIST', d)
+                if d < 1.0:
+                    signal(LevelGoalReached())
+                    self.goal_reached = True
+
     def on_score_updated(self, ev, signal):
         if not self.goal_reached:
             if self.level['goal_type'] == 'spores':
