@@ -358,9 +358,10 @@ class VikingSpawnCtrl:
     
     def spawn_wave(self, scene, count, strength):
         for i in range(count):
+            position = self.spawn_position - ppb.Vector(i * 1.5, 0)
             scene.add(Viking(
                 layer=LAYER_GAMEPLAY_LOW,
-                position=self.spawn_position - ppb.Vector(i * -1.5, 0),
+                position=position,
                 strength=strength,
             ), tags=['viking'])
     
@@ -370,7 +371,6 @@ class VikingSpawnCtrl:
             self.spawn_position = ppb.Vector(self.level.find_map_item('VS'))
         except KeyError:
             self.spawn_position = ppb.Vector(-15, 0)
-            assert 0
 
     def on_update(self, ev, signal):
         if self.active:
@@ -410,8 +410,9 @@ class VikingSpawnCtrl:
                             danger -= strength
                         
                     for i, strength in enumerate(strengths * 3):
+                        position = self.spawn_position - ppb.Vector(i * 1.5, 0)
                         ev.scene.add(Viking(
                             layer=LAYER_GAMEPLAY_LOW,
-                            position=self.spawn_position - ppb.Vector(i * -1.5, 0),
+                            position=position,
                             strength=strength,
                         ), tags=['viking'])
