@@ -29,6 +29,8 @@ def dist(v1, v2):
     return math.sqrt(a + b)
 
 
+IMAGE_SHIELD = ppb.Image("resources/viking/shield.png")
+
 VIKING_ATK = Animation("resources/viking/l0_sprite_{1..7}.png", 10)
 VIKING_WALK = Animation("resources/viking/l0_sprite_{1..7}.png", 10)
 
@@ -224,18 +226,28 @@ def state_method(name):
     return _
 
 
-class VikingShield(ppb.Sprite):
+class AnchoredSprite(ppb.Sprite):
     anchor_sprite: ppb.Sprite
     local_position: ppb.Vector = ppb.Vector(0.5, 0)
     local_layer: float = 0.0
 
-    image = ppb.Image("resources/viking/shield.png")
     size = 2
     opacity = 255
 
     def on_pre_render(self, ev, signal):
         self.position = self.anchor_sprite.position + self.local_position
         self.layer = self.anchor_sprite.layer + self.local_layer
+    
+    @classmethod
+    def create(cls, scene, anchor, image, offset=ppb.Vector(0, 0), layer=0.0):
+        anchored = AnchoredSprite(
+            anchor_sprite=anchor,
+            image=image,
+            local_position=offset,
+            local_layer=layer,
+        )
+        scene.add(anchored)
+        return anchored
 
 
 class Viking(ppb.Sprite):
@@ -374,8 +386,7 @@ class VikingSpawnCtrl:
                 strength=strength,
             )
             scene.add(viking, tags=['viking'])
-            shield = VikingShield(anchor_sprite=viking, local_layer=1)
-            scene.add(shield)
+            AnchoredSprite.create(scene, viking, IMAGE_SHIELD, ppb.Vector(0.5, 0.0), 0.9)
     
     def on_level_loaded(self, ev, signal):
         self.level = ev.level
