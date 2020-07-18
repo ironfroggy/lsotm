@@ -224,6 +224,20 @@ def state_method(name):
     return _
 
 
+class VikingShield(ppb.Sprite):
+    anchor_sprite: ppb.Sprite
+    local_position: ppb.Vector = ppb.Vector(0.5, 0)
+    local_layer: float = 0.0
+
+    image = ppb.Image("resources/viking/shield.png")
+    size = 2
+    opacity = 255
+
+    def on_pre_render(self, ev, signal):
+        self.position = self.anchor_sprite.position + self.local_position
+        self.layer = self.anchor_sprite.layer + self.local_layer
+
+
 class Viking(ppb.Sprite):
     size: float = 0.0
     speed: float = 1.5
@@ -238,7 +252,7 @@ class Viking(ppb.Sprite):
     target: ppb.Sprite = None
     # nearest_mushroom: 'mushrooms.Mushroom' = None
 
-    children: [ppb.Sprite] = []
+    children: [ppb.Sprite] = None
 
     state: typing.Type[State] = None
     last_state_change: float = 0.0
@@ -298,6 +312,7 @@ class Viking(ppb.Sprite):
 
         # Initialize child sprites on the first frame
         if not self.children:
+            self.children = []
             self.children.append(ppb.Sprite(
                 image=VIKING_WALK,
                 layer=layer,
@@ -310,16 +325,19 @@ class Viking(ppb.Sprite):
 
             self.children.append(ppb.Sprite(image=VIKING_CLOTHES[clothes_i], layer=layer + 0.1, size=2, opacity=255))
             self.children.append(ppb.Sprite(image=VIKING_HAT[hat_i], layer=layer + 0.1, size=2, opacity=255))
+
             self.children.append(ppb.Sprite(image=ppb.Image("resources/viking/dead_fg.png"), size=2))
             self.children[-1].opacity = 0
 
             for child in self.children:
                 ev.scene.add(child)
+                child.local_position = ppb.Vector(0, 0)
 
         self.state.on_pre_render(self, ev, signal)
 
+        self.layer = layer
         for i, child in enumerate(self.children):
-            child.position = self.position
+            child.position = self.position + child.local_position
             child.layer = layer + i * 0.1
     
     def on_update(self, ev: Update, signal):
@@ -350,11 +368,14 @@ class VikingSpawnCtrl:
     def spawn_wave(self, scene, count, strength):
         for i in range(count):
             position = self.spawn_position - ppb.Vector(i * 1.5, 0)
-            scene.add(Viking(
+            viking = Viking(
                 layer=LAYER_GAMEPLAY_LOW,
                 position=position,
                 strength=strength,
-            ), tags=['viking'])
+            )
+            scene.add(viking, tags=['viking'])
+            shield = VikingShield(anchor_sprite=viking, local_layer=1)
+            scene.add(shield)
     
     def on_level_loaded(self, ev, signal):
         self.level = ev.level
@@ -402,8 +423,9 @@ class VikingSpawnCtrl:
                         
                     for i, strength in enumerate(strengths * 3):
                         position = self.spawn_position - ppb.Vector(i * 1.5, 0)
-                        ev.scene.add(Viking(
+                        viking = Viking(
                             layer=LAYER_GAMEPLAY_LOW,
                             position=position,
                             strength=strength,
-                        ), tags=['viking'])
+                        )
+                        ev.scene.add(viking, tags=['viking'])
