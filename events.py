@@ -1,10 +1,13 @@
 from dataclasses import dataclass
 
+import ppb
+
 
 @dataclass
 class StartGame:
     pass
 
+@dataclass
 class RestartGame:
     pass
 
@@ -26,9 +29,11 @@ class HoverSeed:
     x: int
     y: int
 
+@dataclass
 class SeedHeld:
     pass
 
+@dataclass
 class SeedReleased:
     pass
 

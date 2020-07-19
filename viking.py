@@ -18,6 +18,7 @@ from utils.statemachine import StateMachine
 from utils.spritedepth import pos_to_layer
 
 from systems.particles import ParticleSystem
+from systems.entities import CreateSprite, SpriteAdded, SpriteRemoved
 from ppb_timing import repeat
 
 # from vikings.corpse import CorpseCtrl
@@ -189,6 +190,7 @@ class DieingState(State):
         tweening.tween(self, 'position', s.position + ppb.Vector(-0.5, -0.25), 0.5)
         self.children[-1].opacity = 255
         signal(VikingDeath(self))
+        signal(SpriteRemoved(self))
 
     @staticmethod
     def on_update(self, ev, signal):
@@ -224,30 +226,6 @@ def state_method(name):
         if handler:
             handler(self, ev, signal)
     return _
-
-
-class AnchoredSprite(ppb.Sprite):
-    anchor_sprite: ppb.Sprite
-    local_position: ppb.Vector = ppb.Vector(0.5, 0)
-    local_layer: float = 0.0
-
-    size = 2
-    opacity = 255
-
-    def on_pre_render(self, ev, signal):
-        self.position = self.anchor_sprite.position + self.local_position
-        self.layer = self.anchor_sprite.layer + self.local_layer
-    
-    @classmethod
-    def create(cls, scene, anchor, image, offset=ppb.Vector(0, 0), layer=0.0):
-        anchored = AnchoredSprite(
-            anchor_sprite=anchor,
-            image=image,
-            local_position=offset,
-            local_layer=layer,
-        )
-        scene.add(anchored)
-        return anchored
 
 
 class Viking(ppb.Sprite):
@@ -377,7 +355,7 @@ class VikingSpawnCtrl:
     def start(self):
         self.active = True
     
-    def spawn_wave(self, scene, count, strength):
+    def spawn_wave(self, scene, signal, count, strength):
         for i in range(count):
             position = self.spawn_position - ppb.Vector(i * 1.5, 0)
             viking = Viking(
@@ -386,7 +364,13 @@ class VikingSpawnCtrl:
                 strength=strength,
             )
             scene.add(viking, tags=['viking'])
-            AnchoredSprite.create(scene, viking, IMAGE_SHIELD, ppb.Vector(0.5, 0.0), 0.9)
+            signal(CreateSprite(
+                image=IMAGE_SHIELD,
+                anchor=viking,
+                position=ppb.Vector(0.5, 0.0),
+                size=2,
+                layer=0.9,
+            ))
     
     def on_level_loaded(self, ev, signal):
         self.level = ev.level
@@ -408,14 +392,14 @@ class VikingSpawnCtrl:
                     try:
                         wave_count = self.level[f'wave.{self.wave_number}.count']
                         wave_strength = self.level[f'wave.{self.wave_number}.strength']
-                        self.spawn_wave(ev.scene, wave_count, wave_strength)
+                        self.spawn_wave(ev.scene, signal, wave_count, wave_strength)
                     except KeyError:
                         # If repeating, go back to wave 0
                         if self.level.get('wave.repeat'):
                             self.wave_number = 1
                             wave_count = self.level[f'wave.{self.wave_number}.count']
                             wave_strength = self.level[f'wave.{self.wave_number}.strength']
-                            self.spawn_wave(ev.scene, wave_count, wave_strength)
+                            self.spawn_wave(ev.scene, signal, wave_count, wave_strength)
                         else:
                             # I guess... no more vikings?????
                             signal(VikingSpawningDone())

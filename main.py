@@ -19,6 +19,7 @@ from ppb_tween import Tweener, Tweening, tween
 from ppb_timing import Timers, repeat
 
 from systems.cloud import CloudSystem
+from systems.entities import SpriteManager
 from systems.floatingnumbers import FloatingNumberSystem
 from systems.renderer import CustomRenderer
 from systems.text import Text
@@ -76,6 +77,7 @@ ppb.run(
         ui.UISystem,
         FloatingNumberSystem,
         ProgressSystem,
+        SpriteManager,
     ] + ([DiagnosticSystem] if DIAGNOSE else []),
     resolution=(1280, 720),
     window_title='🍄Last Stand of the Mushrooms🍄',
