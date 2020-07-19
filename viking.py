@@ -18,7 +18,7 @@ from utils.statemachine import StateMachine
 from utils.spritedepth import pos_to_layer
 
 from systems.particles import ParticleSystem
-from systems.entities import CreateSprite, SpriteAdded, SpriteRemoved
+from systems.entities import SpriteAdded, SpriteRemoved, RemoveSprite, create_sprite
 from ppb_timing import repeat
 
 # from vikings.corpse import CorpseCtrl
@@ -102,7 +102,7 @@ class ApproachState(State):
 
     @staticmethod
     def enter_state(self, scene, signal):
-        self.children[0].image = VIKING_WALK
+        self.parts['base'].image = VIKING_WALK
         self.find_next_target(scene)
     
     @staticmethod
@@ -134,7 +134,7 @@ class AttackState(State):
 
     @staticmethod
     def enter_state(self, scene, signal):
-        self.children[0].image = VIKING_BASE[0]
+        self.parts['base'].image = VIKING_BASE[0]
         self.attack_cooldown = 1.0
 
     @staticmethod
@@ -151,7 +151,7 @@ class AttackState(State):
             if d <= 1.5:
                 signal(VikingAttack(self.target, self.atk))
                 self.attack_cooldown = 1.0
-                self.children[0].image = Animation("resources/viking/attack_{0..4}.png", 10)
+                self.parts['base'].image = Animation("resources/viking/attack_{0..4}.png", 10)
             else:
                 self.set_state("approach", ev.scene, signal)
 
@@ -160,47 +160,39 @@ class CooldownState(State):
 
     @staticmethod
     def on_update(self, ev, signal):
-        if True: # self.state_time() >= 0.5:
-            self.children[0].image = VIKING_BASE[0]
-        if True: # self.state_time() >= 1.0:
-            if not self.target or not self.target.health:
-                try:
-                    self.find_next_target(ev.scene)
-                except IndexError:
-                    self.target = None
-                    self.set_state("cooldown", ev.scene, signal)
-            
-            if self.target:
-                d = dist(self.position, self.target.position)
+        self.parts['base'].image = VIKING_BASE[0]
+        if not self.target or not self.target.health:
+            try:
+                self.find_next_target(ev.scene)
+            except IndexError:
+                self.target = None
+                self.set_state("cooldown", ev.scene, signal)
+        
+        if self.target:
+            d = dist(self.position, self.target.position)
 
-                if d <= self.target.approach_distance:
-                    self.set_state("attack", ev.scene, signal)
-                else:
-                    self.set_state("approach", ev.scene, signal)
+            if d <= self.target.approach_distance:
+                self.set_state("attack", ev.scene, signal)
+            else:
+                self.set_state("approach", ev.scene, signal)
 
 
 class DieingState(State):
 
     @staticmethod
     def enter_state(self, scene, signal):
-        self.children[0].image = ppb.Image("resources/viking/dead_bg.png")
+        self.parts['base'].image = ppb.Image("resources/viking/dead_bg.png")
         for s in self.sprites:
             tweening.tween(s, 'rotation', 90, 0.5)
             tweening.tween(s, 'opacity', 0, 5.0)
         tweening.tween(self, 'position', s.position + ppb.Vector(-0.5, -0.25), 0.5)
-        self.children[-1].opacity = 255
+        self.parts['corpse'].opacity = 255
         signal(VikingDeath(self))
-        signal(SpriteRemoved(self))
 
     @staticmethod
     def on_update(self, ev, signal):
         if self.state_time() >= 5.0:
-            ev.scene.remove(self)
-            for child in self.children:
-                try:
-                    ev.scene.remove(child)
-                except KeyError:
-                    pass
+            signal(SpriteRemoved(self))
             if self.particle_timer:
                 ev.scene.remove(self.particle_timer)
         
@@ -242,7 +234,7 @@ class Viking(ppb.Sprite):
     target: ppb.Sprite = None
     # nearest_mushroom: 'mushrooms.Mushroom' = None
 
-    children: [ppb.Sprite] = None
+    parts: [ppb.Sprite] = None
 
     state: typing.Type[State] = None
     last_state_change: float = 0.0
@@ -267,7 +259,7 @@ class Viking(ppb.Sprite):
     
     @property
     def sprites(self):
-        yield from self.children
+        yield from self.parts.values()
     
     def find_next_target(self, scene):
         mushrooms = list(scene.get(tag='mushroom'))
@@ -301,34 +293,49 @@ class Viking(ppb.Sprite):
         layer = pos_to_layer(self.position)
 
         # Initialize child sprites on the first frame
-        if not self.children:
-            self.children = []
-            self.children.append(ppb.Sprite(
-                image=VIKING_WALK,
-                layer=layer,
-                size=2,
-                opacity=255,
-            ))
+        if not self.parts:
+            self.parts = {}
 
             clothes_i = min(len(VIKING_CLOTHES), max(1, self.strength // 2)) - 1
             hat_i = min(len(VIKING_HAT), max(1, self.strength - clothes_i)) - 1
 
-            self.children.append(ppb.Sprite(image=VIKING_CLOTHES[clothes_i], layer=layer + 0.1, size=2, opacity=255))
-            self.children.append(ppb.Sprite(image=VIKING_HAT[hat_i], layer=layer + 0.1, size=2, opacity=255))
+            self.parts['base'] = create_sprite(
+                image=VIKING_WALK,
+                anchor=self,
+                size=2,
+            )
 
-            self.children.append(ppb.Sprite(image=ppb.Image("resources/viking/dead_fg.png"), size=2))
-            self.children[-1].opacity = 0
+            self.parts['clothes'] = create_sprite(
+                image=VIKING_CLOTHES[clothes_i],
+                anchor=self,
+                layer=0.1,
+                size=2,
+            )
+            self.parts['hat'] = create_sprite(
+                image=VIKING_HAT[hat_i],
+                anchor=self,
+                layer=0.1,
+                size=2,
+            )
 
-            for child in self.children:
-                ev.scene.add(child)
-                child.local_position = ppb.Vector(0, 0)
+            self.parts['corpse'] = create_sprite(
+                image=ppb.Image("resources/viking/dead_fg.png"),
+                anchor=self,
+                layer=0.1,
+                size=2,
+                opacity=0,
+            )
+
+            self.parts['shield'] = create_sprite(
+                image=IMAGE_SHIELD,
+                anchor=self,
+                position=ppb.Vector(0.5, 0.0),
+                size=2,
+                layer=0.9,
+            )
 
         self.state.on_pre_render(self, ev, signal)
-
         self.layer = layer
-        for i, child in enumerate(self.children):
-            child.position = self.position + child.local_position
-            child.layer = layer + i * 0.1
     
     def on_update(self, ev: Update, signal):
         self.state.on_update(self, ev, signal)
@@ -358,19 +365,12 @@ class VikingSpawnCtrl:
     def spawn_wave(self, scene, signal, count, strength):
         for i in range(count):
             position = self.spawn_position - ppb.Vector(i * 1.5, 0)
-            viking = Viking(
+            viking = create_sprite(Viking,
                 layer=LAYER_GAMEPLAY_LOW,
                 position=position,
                 strength=strength,
+                tags=['viking'],
             )
-            scene.add(viking, tags=['viking'])
-            signal(CreateSprite(
-                image=IMAGE_SHIELD,
-                anchor=viking,
-                position=ppb.Vector(0.5, 0.0),
-                size=2,
-                layer=0.9,
-            ))
     
     def on_level_loaded(self, ev, signal):
         self.level = ev.level
