@@ -228,6 +228,7 @@ class Viking(ppb.Sprite):
     strength: int = 1
     last_hit: float = 0.0
     last_hit_by: int = 0
+    shield: bool = False
 
     target_path_step: int = 0
     target_path: typing.List[typing.Tuple[float, float]] = None
@@ -241,11 +242,15 @@ class Viking(ppb.Sprite):
     particle_timer: 'systems.timer.Timer' = None
 
     def __init__(self, *args, **kwargs):
-        self.strength = kwargs.pop('strength')
         self.hp = max(1, self.strength)
         self.atk = max(1, self.strength - self.hp)
-        super().__init__(*args, **kwargs)
         self.state = ApproachState
+
+        for k, v in Viking.__annotations__.items():
+            if k in kwargs:
+                setattr(self, k, kwargs.pop(k))
+
+        super().__init__(*args, **kwargs)
     
     @property
     def next_pos(self):
@@ -326,13 +331,14 @@ class Viking(ppb.Sprite):
                 opacity=0,
             )
 
-            self.parts['shield'] = create_sprite(
-                image=IMAGE_SHIELD,
-                anchor=self,
-                position=ppb.Vector(0.5, 0.0),
-                size=2,
-                layer=0.9,
-            )
+            if self.shield:
+                self.parts['shield'] = create_sprite(
+                    image=IMAGE_SHIELD,
+                    anchor=self,
+                    position=ppb.Vector(0.5, 0.0),
+                    size=2,
+                    layer=0.9,
+                )
 
         self.state.on_pre_render(self, ev, signal)
         self.layer = layer
@@ -340,7 +346,7 @@ class Viking(ppb.Sprite):
     def on_update(self, ev: Update, signal):
         self.state.on_update(self, ev, signal)
 
-        if self.hp:
+        if self.hp and 'shield' in self.parts:
             s = math.sin(get_time() * 4)
             self.parts['shield'].position = ppb.Vector(0.5, 0.05 - s * 0.1)
     
@@ -369,10 +375,12 @@ class VikingSpawnCtrl:
     def spawn_wave(self, scene, signal, count, strength):
         for i in range(count):
             position = self.spawn_position - ppb.Vector(i * 1.5, 0)
+            shield = self.level.get(f'wave.{self.wave_number}.{i+1}.shield', False)
             viking = create_sprite(Viking,
                 layer=LAYER_GAMEPLAY_LOW,
                 position=position,
                 strength=strength,
+                shield=shield,
                 tags=['viking'],
             )
     
@@ -419,7 +427,7 @@ class VikingSpawnCtrl:
                             strength = randint(1, danger)
                             strengths.append(strength)
                             danger -= strength
-                        
+
                     for i, strength in enumerate(strengths * 3):
                         position = self.spawn_position - ppb.Vector(i * 1.5, 0)
                         viking = Viking(

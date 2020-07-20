@@ -93,6 +93,7 @@ class SpriteManager(System):
         if 'image' in kwargs:
             if isinstance(kwargs['image'], str):
                 kwargs['image'] = ppb.Image(kwargs['image'])
+
         sprite = sprite_class(**kwargs)
 
         if anchor:
