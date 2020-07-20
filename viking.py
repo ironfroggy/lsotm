@@ -339,6 +339,10 @@ class Viking(ppb.Sprite):
     
     def on_update(self, ev: Update, signal):
         self.state.on_update(self, ev, signal)
+
+        if self.hp:
+            s = math.sin(get_time() * 4)
+            self.parts['shield'].position = ppb.Vector(0.5, 0.05 - s * 0.1)
     
     def on_cloud_poison(self, ev, signal):
         d = dist(self.position, ev.position)

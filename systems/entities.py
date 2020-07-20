@@ -60,14 +60,14 @@ class SpriteManager(System):
         _INSTANCE = self
 
     def on_scene_started(self, ev: SceneStarted, signal):
-        ev.scene.__anchors = set()
         self.current_scene = ev.scene
         self.signal = signal
     
     def on_pre_render(self, ev: PreRender, signal):
-        for anchor in ev.scene.__anchors:
-            anchor.child.position = anchor.parent.position + anchor.position
-            anchor.child.layer = anchor.parent.layer + anchor.layer
+        # Before render, offset the position and layer of children from their parents
+        for sprite in ev.scene.get(tag='anchored'):
+            sprite.position = sprite.anchor.position + sprite.local_position
+            sprite.layer = sprite.anchor.layer + sprite.local_layer
 
     def on_create_sprite(self, ev: CreateSprite, signal):
         self.create(**vars(ev))
@@ -78,26 +78,29 @@ class SpriteManager(System):
     
     def on_sprite_removed(self, ev: SpriteRemoved, signal):
         to_remove = set()
-        for anchor in ev.scene.__anchors:
-            if anchor.parent == ev.sprite:
-                signal(RemoveSprite(anchor.child))
-                to_remove.add(anchor)
-        for anchor in to_remove:
-            ev.scene.__anchors.remove(anchor)
+        for sprite in ev.scene.get(tag='anchored'):
+            if sprite.anchor is ev.sprite:
+                signal(RemoveSprite(sprite))
+                to_remove.add(sprite)
+        for sprite in to_remove:
+            ev.scene.remove(sprite)
     
     def create(self, sprite_class=ppb.Sprite, anchor=None, **kwargs):
+        kwargs.setdefault('layer', 0.0)
+        kwargs.setdefault('position', ppb.Vector(0, 0))
         kwargs.setdefault('opacity', 255)
         tags = kwargs.pop('tags', [])
         if 'image' in kwargs:
             if isinstance(kwargs['image'], str):
                 kwargs['image'] = ppb.Image(kwargs['image'])
         sprite = sprite_class(**kwargs)
+
         if anchor:
-            layer = kwargs.get('layer', 0.0)
-            assert layer is not None, kwargs
-            self.current_scene.__anchors.add(
-                Anchor(anchor, sprite, kwargs.get('position', ppb.Vector(0, 0)), layer)
-            )
+            sprite.anchor = anchor
+            sprite.local_position = kwargs['position']
+            sprite.local_layer = kwargs['layer']
+            tags.append('anchored')
+
         self.current_scene.add(sprite, tags=tags)
         self.signal(SpriteAdded(sprite))
         return sprite
