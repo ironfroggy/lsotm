@@ -1,3 +1,3 @@
 ppb==0.8.0
 ppb_tween==0.1.0
-ppb-timing
+ppb-timing==0.1.2
