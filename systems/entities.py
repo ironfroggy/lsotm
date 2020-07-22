@@ -73,7 +73,11 @@ class SpriteManager(System):
         self.create(**vars(ev))
     
     def on_remove_sprite(self, ev: RemoveSprite, signal):
-        ev.scene.remove(ev.sprite)
+        try:
+            ev.scene.remove(ev.sprite)
+        except KeyError:
+            pass
+            # print('Sprite removed twice:', ev.sprite)
         signal(SpriteRemoved(ev.sprite))
     
     def on_sprite_removed(self, ev: SpriteRemoved, signal):

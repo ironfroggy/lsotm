@@ -6,6 +6,7 @@ from systems.text import Text
 from constants import COLOR
 
 
+# TODO: Does not work if signal raised during pause seen
 class ScoreCtrl:
 
     @classmethod

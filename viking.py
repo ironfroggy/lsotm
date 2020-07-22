@@ -92,10 +92,16 @@ class State:
                 self.set_state('cooldown', ev.scene, signal)
                 self.last_hit = t
                 self.last_hit_by = ev.cloud_id
-            self.hp -= 1
-            if self.hp <= 0:
-                self.set_state('dieing', ev.scene, signal)
-            signal(CreateFloatingNumber(-1, self.position, (255, 0, 0)))
+            if self.shield:
+                self.shield -= 1
+                signal(CreateFloatingNumber(-1, self.position, (0, 0, 255)))
+                if self.shield == 0:
+                    self.parts['shield'].opacity = 0
+            else:
+                self.hp -= 1
+                if self.hp <= 0:
+                    self.set_state('dieing', ev.scene, signal)
+                signal(CreateFloatingNumber(-1, self.position, (255, 0, 0)))
 
 
 class ApproachState(State):
@@ -192,7 +198,7 @@ class DieingState(State):
     @staticmethod
     def on_update(self, ev, signal):
         if self.state_time() >= 5.0:
-            signal(SpriteRemoved(self))
+            signal(RemoveSprite(self))
             if self.particle_timer:
                 ev.scene.remove(self.particle_timer)
         
@@ -375,7 +381,8 @@ class VikingSpawnCtrl:
     def spawn_wave(self, scene, signal, count, strength):
         for i in range(count):
             position = self.spawn_position - ppb.Vector(i * 1.5, 0)
-            shield = self.level.get(f'wave.{self.wave_number}.{i+1}.shield', False)
+            shield_default = self.level.get(f'wave.{self.wave_number}.shield', 0)
+            shield = self.level.get(f'wave.{self.wave_number}.{i+1}.shield', shield_default)
             viking = create_sprite(Viking,
                 layer=LAYER_GAMEPLAY_LOW,
                 position=position,
