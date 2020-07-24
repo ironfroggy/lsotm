@@ -40,6 +40,12 @@ VIKING_BASE = [
     # for i in range(1, 8)
 ]
 
+VIKING_HAIR = [
+    None,
+    ppb.Image(f"resources/viking/maiden_hair_0.png"),
+    ppb.Image(f"resources/viking/maiden_hair_1.png"),
+]
+
 VIKING_HAT = [
     ppb.Image(f"resources/viking/hat_{i:02d}.png")
     for i in range(1, 11)
@@ -191,7 +197,7 @@ class DieingState(State):
         for s in self.sprites:
             tweening.tween(s, 'rotation', 90, 0.5)
             tweening.tween(s, 'opacity', 0, 5.0)
-        tweening.tween(self, 'position', s.position + ppb.Vector(-0.5, -0.25), 0.5)
+        tweening.tween(self, 'position', self.position + ppb.Vector(-0.5, -0.25), 0.5)
         self.parts['corpse'].opacity = 255
         signal(VikingDeath(self))
 
@@ -248,13 +254,12 @@ class Viking(ppb.Sprite):
     particle_timer: 'systems.timer.Timer' = None
 
     def __init__(self, *args, **kwargs):
-        self.hp = max(1, self.strength)
-        self.atk = max(1, self.strength - self.hp)
-        self.state = ApproachState
-
         for k, v in Viking.__annotations__.items():
             if k in kwargs:
                 setattr(self, k, kwargs.pop(k))
+        self.hp = max(1, self.strength)
+        self.atk = max(1, self.strength - self.hp)
+        self.state = ApproachState
 
         super().__init__(*args, **kwargs)
     
@@ -322,12 +327,22 @@ class Viking(ppb.Sprite):
                 layer=0.1,
                 size=2,
             )
-            self.parts['hat'] = create_sprite(
-                image=VIKING_HAT[hat_i],
-                anchor=self,
-                layer=0.1,
-                size=2,
-            )
+
+            if self.shield:
+                self.parts['hair'] = create_sprite(
+                    image=choice(VIKING_HAIR),
+                    anchor=self,
+                    layer=0.2,
+                    size=2,
+                )
+            else:
+                self.parts['hat'] = create_sprite(
+                    image=VIKING_HAT[hat_i],
+                    anchor=self,
+                    layer=0.2,
+                    size=2,
+                )
+
 
             self.parts['corpse'] = create_sprite(
                 image=ppb.Image("resources/viking/dead_fg.png"),
