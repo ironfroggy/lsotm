@@ -42,6 +42,7 @@ GROUND_IMAGES = [
 ]
 TREE_H = ppb.Image("resources/ground/tree_horizontal.png")
 TREE_V = ppb.Image("resources/ground/tree_vertical.png")
+ROCKS = ppb.Image("resources/ground/rocks.png")
 EXIT = ppb.Image("resources/ground/exit.png")
 
 ITEMS = {
@@ -51,6 +52,9 @@ ITEMS = {
     't4': make_mapitem(TREE_H, (0,  0, 32, 32), SOLID),
     't5': make_mapitem(TREE_H, (32, 0, 32, 32), SOLID),
     't6': make_mapitem(TREE_H, (64, 0, 32, 32), SOLID),
+    'r1': make_mapitem(ROCKS, (0,  0, 32, 32), SOLID),
+    'r2': make_mapitem(ROCKS, (32, 0, 32, 32), SOLID),
+    'r3': make_mapitem(ROCKS, (64, 0, 32, 32), SOLID),
     'EX': make_mapitem(EXIT, (0, 0, 32, 32), DECOR),
 }
 
@@ -98,9 +102,14 @@ class TilemapCtrl:
         for cell in level.map_data.values():
             if cell:
                 try:
-                    factory = ITEMS[cell.code]
+                    if cell.code[1] == '*':
+                        keys = [k for k in ITEMS.keys() if k[0] == cell.code[0]]
+                        code = random.choice(keys)
+                    else:
+                        code = cell.code
+                    factory = ITEMS[code]
                 except KeyError:
-                    print("Missing item key:", cell.code)
+                    print("Missing item key:", code)
                 else:
                     t = factory(cell.x, cell.y)
                     if t:
